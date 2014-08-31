@@ -1,0 +1,33 @@
+# aliases
+
+alias sudo="sudo "
+
+alias ls="ls --color=auto"
+alias lsa="ls -a"
+alias ll="ls -l"
+alias lla="ll -a"
+alias l="ls"
+alias grep="grep -E --color=auto"
+alias gdb="gdb -q -tui"
+alias how="howdoi"
+alias dd="dclfdd"
+
+alias pymake="python setup.py"
+
+# functions
+
+function iosplit() {
+	local fd=""
+	local arg="$1"
+	while shift 1 >/dev/null 2>&1; do
+		if [ "$arg" = "-" ]; then
+			arg="/dev/stdout"
+		fi
+		fd="$fd >$arg"
+		arg="$1"
+	done
+	echo $fd
+	if [ -n $fd ]; then
+		eval "cat$fd"
+	fi
+}
