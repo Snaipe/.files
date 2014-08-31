@@ -1,0 +1,7 @@
+keysym f = f F f F U2200 U2203
+keysym u = u U u U U222A U2229
+keysym i = i I i I U2208 U2209
+keysym n = n N n N U2283 U2282
+keysym y = y Y y Y U221E U221D
+keycode 51 = asterisk U2218 asterisk U2218 U2217
+keycode 94 = less greater less greater U2264 U2265

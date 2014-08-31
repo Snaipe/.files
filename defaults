@@ -1,0 +1,96 @@
+!-------------------------------------------------------------------------------
+! Xft settings
+!-------------------------------------------------------------------------------
+Xft.dpi: 96
+Xft.antialias: true
+Xft.rgba: rgb
+Xft.hinting: true
+Xft.hintstyle: hintslight
+
+!-------------------------------------------------------------------------------
+! URxvt settings
+! Colours lifted from Solarized (http://ethanschoonover.com/solarized)
+! More info at:
+! http://pod.tst.eu/http://cvs.schmorp.de/rxvt-unicode/doc/rxvt.1.pod
+!-------------------------------------------------------------------------------
+
+!URxvt.depth: 32
+URxvt*.transparent: false
+!URxvt.fading: 0
+URxvt.urgentOnBell: true
+URxvt.visualBell: false
+URxvt.loginShell: true
+URxvt.saveLines: 500
+URxvt.lineSpace: 1
+
+! Padding
+URxvt.internalBorder:10
+URxvt.externalBorder:02
+
+! Font
+URxvt.font: xft:Inconsolata\-dz for Powerline:size=11
+URxvt.boldfont: xft:Inconsolata-dz for Powerline:size=11:style=Bold
+
+! Scrollbar
+URxvt.scrollBar: False
+URxvt.secondaryScroll: true
+
+! Input Method
+URxvt.preeditType: Root
+URxvt.inputMethod: fcitx
+
+! Perl extensions
+URxvt.perl-ext-common: default,matcher
+URxvt.matcher.button: 1
+URxvt.urlLauncher: firefox
+
+! Commands
+!! ---- ctrl+F12 --> clean screen and scroll-bar
+URxvt.keysym.Control-F12: command:\033c
+
+! Tabs
+!URxvt.perl-ext-common: tabbed
+!URxvt.tabbed.tabbar-fg: 8
+!URxvt.tabbed.tabbar-bg: 11
+!URxvt.tabbed.tab-fg: 11
+!URxvt.tabbed.tab-bg: 8
+
+! Cursor
+URxvt.cursorBlink: true
+URxvt.cursorColor: #CCCCCC
+URxvt.cursorUnderline: true
+
+! Pointer
+URxvt.pointerBlank: false
+
+! Colours
+URxvt*background: #2D2D2D
+URxvt*foreground: #CCCCCC
+URxvt*cursorColor: #999999
+URxvt*colorBD: #FFFFFF
+URxvt*colorUL: #CCCCFF
+
+!BLK
+URxvt*color0:#666666
+URxvt*color8:#999999
+!RED
+URxvt*color1:#E53238
+URxvt*color9:#ED6666
+!GRN
+URxvt*color2: #99CC66
+URxvt*color10: #99FF99
+!YEL
+URxvt*color3:#CC9966
+URxvt*color11: #FFFF99
+!BLE
+URxvt*color4: #6699CC
+URxvt*color12: #99CCFF
+!MAG
+URxvt*color5:#CC6699
+URxvt*color13: #FF99CC
+!CYN
+URxvt*color6:#66CCCC
+URxvt*color14: #99FFFF
+!WHT
+URxvt*color7:#CCCCCC
+URxvt*color15: #FFFFFF

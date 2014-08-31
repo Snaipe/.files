@@ -1,0 +1,11 @@
+xrdb -merge ~/.Xdefaults &
+xmodmap ~/.Xmodmap &
+
+xsetroot -cursor_name left_ptr
+setxkbmap -layout fr
+
+feh --bg-scale ~/.xmonad/wallpaper.jpg
+
+stalonetray &
+
+xmonad
