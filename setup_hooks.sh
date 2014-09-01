@@ -1,3 +1,3 @@
 for f in $(/bin/ls .githooks); do
-	ln -s ../../.githooks/$f .git/hooks/$f
+	ln -s ../../../../.X/.githooks/$f ../.git/modules/.X/hooks/$f
 done
