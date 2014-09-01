@@ -7,5 +7,7 @@ setxkbmap -layout fr
 feh --bg-scale ~/.xmonad/wallpaper.jpg
 
 stalonetray &
+mpd &
+compton -b --config ~/.comptonrc
 
 xmonad
