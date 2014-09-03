@@ -3,11 +3,7 @@ alias map=typeset -A
 alias bind=typeset -T
 alias var=typeset
 
-bind LD_LIBRARY_PATH ldpath
-bind EDITOR editor
-bind PAGER pager
-bind READNULLCMD nullpager
-bind LESS less
+typeset -T LD_LIBRARY_PATH ldpath
 typeset -U path ldpath
 
 export JAVA_HOME="/usr/lib/jvm/java-7-openjdk/"
@@ -17,9 +13,10 @@ export _JAVA_OPTIONS='-Dawt.useSystemAAFontSettings=on -Dswing.aatext=true -Dswi
 
 path=(~/bin $ANDROID_HOME/tools $ANDROID_HOME/platform-tools ~/.gem/ruby/2.1.0/bin $path)
 ldpath=(/usr/local/lib $ldpath)
-editor=vim
-pager=less
-nullpager=$pager
-less=-FX
+
+export PAGER=less
+export READNULLCMD=$PAGER
+export LESS=-FRX
+export EDITOR=vim
 
 } >/dev/null 2>&1
