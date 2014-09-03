@@ -14,39 +14,46 @@ Xft.hintstyle: hintslight
 ! http://pod.tst.eu/http://cvs.schmorp.de/rxvt-unicode/doc/rxvt.1.pod
 !-------------------------------------------------------------------------------
 
-!URxvt.depth: 32
-URxvt*.transparent: false
+URxvt*termName: rxvt-unicode
+
+URxvt.depth: 32
 !URxvt.fading: 0
 URxvt.urgentOnBell: true
 URxvt.visualBell: false
-URxvt.loginShell: true
+URxvt.loginShell: false
 URxvt.saveLines: 500
 URxvt.lineSpace: 1
+URxvt*letterSpace: -1
 
 ! Padding
 URxvt.internalBorder:10
-URxvt.externalBorder:02
+URxvt.externalBorder:2
 
 ! Font
-URxvt.font: xft:Inconsolata\-dz for Powerline:size=11
-URxvt.boldfont: xft:Inconsolata-dz for Powerline:size=11:style=Bold
+URxvt.font: xft:Meslo LG M DZ for Powerline:size=11:antialias=true:hinting=true:style=Regular,xft:Monospace:size=9:antialias=true:hinting=true
+URxvt.boldfont: xft:Meslo LG M DZ for Powerline:size=11:antialias=true:hinting=true:style=Bold
 
 ! Scrollbar
 URxvt.scrollBar: False
 URxvt.secondaryScroll: true
+
+! Disable Ctrl-Shift functions
+URxvt*iso14755: False
 
 ! Input Method
 URxvt.preeditType: Root
 URxvt.inputMethod: fcitx
 
 ! Perl extensions
-URxvt.perl-ext-common: default,matcher
+URxvt.perl-ext-common: default,matcher,clipboard
 URxvt.matcher.button: 1
 URxvt.urlLauncher: firefox
 
 ! Commands
 !! ---- ctrl+F12 --> clean screen and scroll-bar
 URxvt.keysym.Control-F12: command:\033c
+URxvt.keysym.C-S-c:            perl:clipboard:copy
+URxvt.keysym.C-S-v:            perl:clipboard:paste
 
 ! Tabs
 !URxvt.perl-ext-common: tabbed
@@ -58,21 +65,21 @@ URxvt.keysym.Control-F12: command:\033c
 ! Cursor
 URxvt.cursorBlink: true
 URxvt.cursorColor: #CCCCCC
-URxvt.cursorUnderline: true
+URxvt.cursorUnderline: false
 
 ! Pointer
 URxvt.pointerBlank: false
 
 ! Colours
-URxvt*background: #2D2D2D
+URxvt*background: [95]#101010
 URxvt*foreground: #CCCCCC
 URxvt*cursorColor: #999999
 URxvt*colorBD: #FFFFFF
 URxvt*colorUL: #CCCCFF
 
 !BLK
-URxvt*color0:#666666
-URxvt*color8:#999999
+URxvt*color0:#000000
+URxvt*color8:#666666
 !RED
 URxvt*color1:#E53238
 URxvt*color9:#ED6666
@@ -86,8 +93,8 @@ URxvt*color11: #FFFF99
 URxvt*color4: #6699CC
 URxvt*color12: #99CCFF
 !MAG
-URxvt*color5:#CC6699
-URxvt*color13: #FF99CC
+URxvt*color5:#ED6666
+URxvt*color13: #FF9999
 !CYN
 URxvt*color6:#66CCCC
 URxvt*color14: #99FFFF
