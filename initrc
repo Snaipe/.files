@@ -7,7 +7,7 @@ setxkbmap -layout fr
 feh --bg-scale ~/.xmonad/wallpaper.jpg
 
 stalonetray &
-mpd &
+[ "$(pidof mpd)" ] || mpd
 compton -b --config ~/.comptonrc
 
-xmonad
+exec xmonad
