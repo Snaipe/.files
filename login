@@ -1,6 +1,7 @@
 if [ -z "$SSH_AGENT_PID" ]; then
 {
 	eval $(ssh-agent)
-	trap "kill $SSH_AGENT_PID" 0
-} >/dev/null
+} >/dev/null 2>/dev/null
 fi
+
+exec startx
