@@ -1,8 +1,0 @@
-"toggle-monitor"
-    m:0x14 + c:67
-    Control+Mod2 + F1
-
-"gnome-system-monitor"
-    m:0x15 + c:9
-    Control+Shift+Mod2 + Escape
-
