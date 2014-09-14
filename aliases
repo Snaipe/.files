@@ -11,6 +11,7 @@ alias grep="grep -E --color=auto"
 alias gdb="gdb -q -tui"
 alias how="howdoi"
 alias dd="dclfdd"
+alias dmesg="dmesg -H -Lalways"
 
 alias pymake="python setup.py"
 
