@@ -229,22 +229,6 @@ myKeys conf@(XConfig {XMonad.modMask = modMask}) = M.fromList $
 
   , ((0, xF86XK_Sleep), spawn "systemctl suspend")
 
-  -- Take a screenshot in select mode.
-  -- After pressing this key binding, click a window, or draw a rectangle with
-  -- the mouse.
-  , ((modMask .|. controlMask, xK_s),
-     spawn "~/.xmonad/scripts/select-screenshot")
-
-  -- Take full screenshot in multi-head mode.
-  -- That is, take a screenshot of everything you see.
-  , ((modMask .|. controlMask, xK_f),
-     spawn "~/.xmonad/scripts/screenshot")
-
-  -- Turn off screen.
-  , ((modMask .|. controlMask, xK_o),
-     spawn "~/.xmonad/scripts/screen off")
-
-
   -- Maximize window
   , ((modMask, xK_Up), withFocused (sendMessage . maximizeRestore))
 
