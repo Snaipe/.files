@@ -1,5 +1,5 @@
-xrdb -merge ~/.Xdefaults &
-xmodmap ~/.Xmodmap &
+xrdb -merge ~/.X/defaults &
+xmodmap ~/.X/modmap &
 
 xsetroot -cursor_name left_ptr
 setxkbmap -layout fr
