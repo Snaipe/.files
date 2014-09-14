@@ -1,0 +1,6 @@
+[submodule "themes/Numix"]
+	path = themes/Numix
+	url = https://github.com/shimmerproject/Numix.git
+[submodule "themes/iris"]
+	path = themes/iris
+	url = https://github.com/xyl0n/iris.git
