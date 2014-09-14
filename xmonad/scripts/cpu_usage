@@ -1,0 +1,1 @@
+sparklines $(mpstat 1 1 -P ALL | head -n 12 | tail -n 8 | sed -E 's/ +/ /g' | cut -d' ' -f12 | cut -d, -f1 | sed 's/^/100 - /g' | bc | tr '\n' ' ' | cut -d' ' -f -8) 100 | cut -c -24

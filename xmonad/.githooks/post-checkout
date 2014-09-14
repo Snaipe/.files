@@ -1,0 +1,11 @@
+#!/bin/sh
+
+dir=".xmonad"
+files=".stalonetrayrc:stalonetrayrc"
+
+for f in $files; do
+	link=$(echo $f | cut -d: -f1)
+	file=$(echo $f | cut -d: -f2)
+	rm -f ../$link
+	ln -s $dir/$file ../$link
+done
