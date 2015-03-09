@@ -228,6 +228,7 @@ myKeys conf@(XConfig {XMonad.modMask = modMask}) = M.fromList $
      spawn "xscreensaver-command -lock")
 
   , ((0, xF86XK_Sleep), spawn "systemctl suspend")
+  , ((0, xF86XK_ScreenSaver), spawn "i3lock")
 
   -- Maximize window
   , ((modMask, xK_Up), withFocused (sendMessage . maximizeRestore))
