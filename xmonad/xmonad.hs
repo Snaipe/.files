@@ -202,7 +202,7 @@ myKeys conf@(XConfig {XMonad.modMask = modMask}) = M.fromList $
     ((appMask,    xK_Return), spawn $ XMonad.terminal conf)
 
   -- Launch dmenu.
-  , ((appMask, xK_BackSpace), spawn "PATH=/home/snaipe/cli:$PATH dmenu_run -fn 'Meslo LG M DZ for Powerline' -y 270 -x 320 -w 1280 -p '>' -q -r -z -dim 0.7 -l 22 -nb '#101010' -nf '#cfcfcf' -sb '#ed6666' -sf '#000000'")
+  , ((appMask, xK_BackSpace), spawn "PATH=/home/snaipe/cli:$PATH dmenu_run -fn 'Meslo LG M DZ for Powerline' -y 170 -x 150 -w 1280 -p '>' -q -r -z -dim 0.7 -l 22 -nb '#101010' -nf '#cfcfcf' -sb '#ed6666' -sf '#000000'")
 
   -- Launch weechat
   , ((appMask,         xK_i), spawn "termite --class=weechat -e weechat-curses")

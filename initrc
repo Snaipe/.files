@@ -1,11 +1,12 @@
 xrdb -merge ~/.X/defaults &
-xmodmap ~/.X/modmap &
+/bin/bash -c "sleep 5; xmodmap ~/.X/modmap" &
 
 xsetroot -cursor_name left_ptr
 setxkbmap -layout fr
 
 feh --bg-scale ~/.xmonad/wallpaper.jpg
 
+touchegg &
 stalonetray &
 [ "$(pidof mpd)" ] || mpd
 compton -b --config ~/.comptonrc

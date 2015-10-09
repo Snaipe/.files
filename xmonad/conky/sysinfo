@@ -16,8 +16,8 @@ use_xft yes
 
 TEXT
 ^bg(\#3e1e1e)^fg(\#2e0e0e)^i(.xmonad/icons/separator_right.xbm)^fg() CPU ^bg()^fg(\#cccccc) ${exec .xmonad/scripts/cpu_usage} \
-^bg(\#1e1e1e)^fg(\#343434)^i(.xmonad/icons/separator_right.xbm)^fg() Temp ^bg()^fg(\#cccccc) ${hwmon temp 1}°C \
+^bg(\#1e1e1e)^fg(\#343434)^i(.xmonad/icons/separator_right.xbm)^fg() Temp ^bg()^fg(\#cccccc) ${acpitemp}°C \
 ^bg(\#1e1e1e)^fg(\#343434)^i(.xmonad/icons/separator_right.xbm)^fg() Memory ^bg()^fg(\#cccccc) $mem \
 ^bg(\#1e1e1e)^fg(\#343434)^i(.xmonad/icons/separator_right.xbm)^fg() WLAN ^bg()^fg(\#cccccc) ${downspeedf wlp5s0}/${upspeedf wlp5s0} \
-^bg(\#1e1e1e)^fg(\#343434)^i(.xmonad/icons/separator_right.xbm)^fg() Battery ^bg()^fg(\#cccccc) ${if_match "${exec acpi -b | cut -d' ' -f3}" == "Full,"}^fg(\#00ff9c)⚡^fg(\#cccccc)${endif}${if_match "${exec acpi -b | cut -d' ' -f3}" == "Charging,"}^fg(\#ff9c00)⚡^fg(\#cccccc)${endif} ${battery_percent BAT1}% \
+^bg(\#1e1e1e)^fg(\#343434)^i(.xmonad/icons/separator_right.xbm)^fg() Battery ^bg()^fg(\#cccccc) ${if_match "${exec acpi -b | cut -d' ' -f3}" == "Full,"}^fg(\#00ff9c)⚡^fg(\#cccccc)${endif}${if_match "${exec acpi -b | cut -d' ' -f3}" == "Charging,"}^fg(\#ff9c00)⚡^fg(\#cccccc)${endif} ${battery_percent BAT0}% \
 ^bg(\#1e1e1e)^fg(\#343434)^i(.xmonad/icons/separator_right.xbm)^fg(\#39B7CD) ${time %a %d %I:%M.%S} \
