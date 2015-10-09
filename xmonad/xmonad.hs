@@ -10,6 +10,8 @@ import XMonad.Hooks.UrgencyHook
 import XMonad.Hooks.ManageDocks
 import XMonad.Hooks.ManageHelpers
 import XMonad.Hooks.SetWMName
+import XMonad.Hooks.Script
+import XMonad.Hooks.EwmhDesktops
 
 -- Layouts
 import XMonad.Layout.NoBorders
@@ -23,6 +25,8 @@ import XMonad.Layout.PerWorkspace (onWorkspace, onWorkspaces)
 import XMonad.Layout.NoBorders
 import XMonad.Layout.Grid
 import XMonad.Layout.Fullscreen
+import XMonad.Layout.MultiToggle
+import XMonad.Layout.MultiToggle.Instances
 
 -- Data.Ratio for IM layout
 import Data.Ratio ((%))
@@ -98,7 +102,7 @@ myManageHook = composeAll . concat $
     -- Applications that need to be added to slave panel when created.
     --, [ className =? "termite" --> doF (W.swapDown) ]
 
-    , [ composeOne [ isFullscreen -?> (doF W.focusDown <+> doFullFloat) ] ]
+    , [ isFullscreen --> (doF W.focusDown <+> doFullFloat) ]
   ]
   where
       viewShift          = doF . liftM2 (.) W.greedyView W.shift
@@ -123,6 +127,7 @@ myManageHook = composeAll . concat $
 myLayoutHook = onWorkspace "chat" chatLayout $
                onWorkspace "gimp" gimpLayout $
                maximize $
+               mkToggle (NOBORDERS ?? FULL ?? EOT) $
                defaultLayouts
     where
       layouts        =
@@ -214,6 +219,7 @@ myKeys conf@(XConfig {XMonad.modMask = modMask}) = M.fromList $
   ----------------------------------------------------------------------
   -- Xmonad controls
   --
+  , ((modMask, xK_f), sendMessage $ Toggle FULL)
 
   , ((modMask .|. controlMask, xK_Right), nextWS)
   , ((modMask .|. controlMask, xK_Left), prevWS)
@@ -480,7 +486,7 @@ mySysInfoDzen = myDzen {
 -- Startup hook
 -- By default, do nothing.
 --
-myStartupHook = return ()
+myStartupHook = execScriptHook "xmodmap"
 
 ------------------------------------------------------------------------
 -- Urgency hook
@@ -502,7 +508,7 @@ main = do
   workspaceBar <- spawnDzen myWorkDzen
   spawnToDzen "conky -c ~/.xmonad/conky/sysinfo" mySysInfoDzen
   spawnToDzen "conky -c ~/.xmonad/conky/music" myMusicDzen
-  xmonad $ withUrgencyHook LibNotifyUrgencyHook $ defaults {
+  xmonad $ withUrgencyHook LibNotifyUrgencyHook $ ewmh defaults {
         logHook     = myLogHook workspaceBar
       , manageHook  = manageDocks <+> myManageHook
       , startupHook = setWMName "LG3D"
