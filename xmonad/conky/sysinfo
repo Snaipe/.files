@@ -9,7 +9,7 @@ no_buffers          yes
 
 if_up_strictness address
 short_units on
-update_interval 1.0
+update_interval 0.01
 out_to_console yes
 out_to_x no
 use_xft yes
