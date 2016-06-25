@@ -137,8 +137,10 @@ myLayoutHook = onWorkspace "chat" chatLayout $
         ||| threeCol
         ||| noBorders (fullscreenFull Full)
       defaultLayouts = avoidStruts(layouts)
-      chatLayout     = avoidStruts(IM (1%5) (Or (Title "Buddy List") (And (Resource "main") (ClassName "pidgin"))))
-      gimpLayout     = avoidStruts((withIM (0.12) (Role "gimp-toolbox") $ reflectHoriz $ withIM (0.15) (Role "gimp-dock") Full))
+      chatLayout     = avoidStruts(IM (1%5) (Or (Title "Buddy List") (And (Resource "main") (ClassName "pidgin")))
+                       ||| Full)
+      gimpLayout     = avoidStruts((withIM (0.12) (Role "gimp-toolbox") $ reflectHoriz $ withIM (0.15) (Role "gimp-dock") Full)
+                       ||| Full)
 
       tiled    = Tall nmaster delta ratio
       threeCol = ThreeCol nmaster delta ratio
@@ -512,6 +514,7 @@ main = do
         logHook     = myLogHook workspaceBar
       , manageHook  = manageDocks <+> myManageHook
       , startupHook = setWMName "LG3D"
+      , handleEventHook = XMonad.Hooks.EwmhDesktops.fullscreenEventHook
   }
 
 ------------------------------------------------------------------------
