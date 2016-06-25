@@ -170,10 +170,10 @@ mainDark = "#101010"
 
 -- Border colors
 myNormalBorderColor  = darkGrey
-myFocusedBorderColor = lime
+myFocusedBorderColor = lightGrey
 
 -- Width of the window border in pixels.
-myBorderWidth = 2
+myBorderWidth = 1
 
 ------------------------------------------------------------------------
 -- Key bindings
