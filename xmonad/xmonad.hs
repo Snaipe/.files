@@ -124,23 +124,24 @@ myManageHook = composeAll . concat $
 -- Layout Hook
 --
 
-myLayoutHook = onWorkspace "chat" chatLayout $
-               onWorkspace "gimp" gimpLayout $
-               maximize $
+fullLayout = noBorders (fullscreenFull Full)
+
+myLayoutHook = maximize $
                mkToggle (NOBORDERS ?? FULL ?? EOT) $
+               onWorkspace "chat" chatLayout $
+               onWorkspace "gimp" gimpLayout $
                defaultLayouts
     where
       layouts        =
-        tiled
-        ||| Mirror tiled
-        ||| Full
-        ||| threeCol
-        ||| noBorders (fullscreenFull Full)
+        spacing 10 (tiled
+          ||| Mirror tiled
+          ||| Full
+          ||| threeCol)
+        ||| fullLayout
       defaultLayouts = avoidStruts(layouts)
-      chatLayout     = avoidStruts(IM (1%5) (Or (Title "Buddy List") (And (Resource "main") (ClassName "pidgin")))
-                       ||| Full)
-      gimpLayout     = avoidStruts((withIM (0.12) (Role "gimp-toolbox") $ reflectHoriz $ withIM (0.15) (Role "gimp-dock") Full)
-                       ||| Full)
+      chatLayout     = noBorders(avoidStruts(IM (1%5) (Or (Title "Buddy List") (And (Resource "main") (ClassName "pidgin")))
+                       ||| fullLayout))
+      gimpLayout     = noBorders(avoidStruts((withIM (0.12) (Role "gimp-toolbox") $ reflectHoriz $ withIM (0.15) (Role "gimp-dock") Full)))
 
       tiled    = Tall nmaster delta ratio
       threeCol = ThreeCol nmaster delta ratio
@@ -355,7 +356,7 @@ myKeys conf@(XConfig {XMonad.modMask = modMask}) = M.fromList $
      sendMessage (IncMasterN 1))
 
   -- Decrement the number of windows in the master area.
-  , ((modMask, xK_period),
+  , ((modMask, xK_n),
      sendMessage (IncMasterN (-1)))
 
   -- Quit xmonad.
@@ -428,12 +429,13 @@ myPrettyPrinter h = dzenPP
   , ppLayout          = dzenColor white mainDark . pad .
                         (\x -> case x of
                           "SimplestFloat"                   -> "Float"
-                          "Spacing 10 Maximize Tall"        -> "^i(.xmonad/icons/layout_tall.xbm)"
-                          "Spacing 10 Maximize Mirror Tall" -> "^i(.xmonad/icons/layout_mirror_tall.xbm)"
-                          "Spacing 10 IM"                   -> "^i(.xmonad/icons/layout_im.xbm)"
-                          "Spacing 10 IM ReflectX IM Full"  -> "^i(.xmonad/icons/layout_gimp.xbm)"
-                          "Spacing 10 Maximize ThreeCol"    -> "^i(.xmonad/icons/layout_threecol.xbm)"
-                          "Spacing 10 Maximize Full"        -> "^i(.xmonad/icons/layout_full.xbm)"
+                          "Maximize Spacing 10 Tall"        -> "^i(.xmonad/icons/layout_tall.xbm)"
+                          "Maximize Spacing 10 Mirror Tall" -> "^i(.xmonad/icons/layout_mirror_tall.xbm)"
+                          "Maximize IM"                     -> "^i(.xmonad/icons/layout_im.xbm)"
+                          "Maximize IM ReflectX IM Full"    -> "^i(.xmonad/icons/layout_gimp.xbm)"
+                          "Maximize Spacing 10 ThreeCol"    -> "^i(.xmonad/icons/layout_threecol.xbm)"
+                          "Maximize Spacing 10 Full"        -> "^i(.xmonad/icons/layout_full.xbm)"
+                          "Maximize Full"                   -> "^i(.xmonad/icons/layout_full.xbm)"
                           _                                 -> x
                         )
   }
@@ -539,7 +541,7 @@ defaults = defaultConfig {
     mouseBindings      = myMouseBindings,
 
     -- hooks, layouts
-    layoutHook         = spacing 10 $ myLayoutHook,
+    layoutHook         = myLayoutHook,
     manageHook         = myManageHook,
     startupHook        = myStartupHook
 }
