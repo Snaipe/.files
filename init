@@ -7,6 +7,8 @@ compinit
 promptinit
 colors
 
+zstyle ':completion:*' completer _complete _ignored _files
+
 setopt HIST_IGNORE_DUPS
 
 eval $(dircolors ~/.zsh/dircolors)
