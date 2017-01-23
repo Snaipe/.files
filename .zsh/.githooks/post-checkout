@@ -1,0 +1,10 @@
+#!/bin/sh
+
+files=".zshrc:rc .zshenv:env .zlogin:login .zlogout:logout"
+
+for f in $files; do
+	link=$(echo $f | cut -d: -f1)
+	file=$(echo $f | cut -d: -f2)
+	rm -f ../$link
+	ln -s .zsh/$file ../$link
+done
