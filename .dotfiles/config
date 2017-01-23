@@ -1,0 +1,9 @@
+[core]
+	repositoryformatversion = 0
+	filemode = true
+	bare = true
+[status]
+	showUntrackedFiles = no
+[alias]
+	lock   = "!sudo sh -c \"for f in $(git --git-dir="$HOME/.dotfiles/" --work-tree="$HOME" ls-files); do chattr +i \\\"$f\\\"; done\""
+	unlock = "!sudo sh -c \"for f in $(git --git-dir="$HOME/.dotfiles/" --work-tree="$HOME" ls-files); do chattr -i \\\"$f\\\"; done\""

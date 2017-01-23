@@ -1,0 +1,46 @@
+[user]
+	name = Franklin \"Snaipe\" Mathieu
+	email = snaipe@diacritic.io
+	signingkey = secret
+
+[sendemail]
+	from = Franklin Mathieu <franklinmathieu@gmail.com>
+	smtpserver = smtp.gmail.com
+	smtpuser = franklinmathieu@gmail.com
+	smtpencryption = tls
+	smtppass = secret
+	chainreplyto = false
+	smtpserverport = 587
+
+[alias]
+	st = status -sb
+	sti = status -sb --ignored
+	dr = status -sb -uno
+	ci = commit
+	lg = log --color --graph --pretty='%Cred%h%Creset %C(bold blue)<%an> %Cgreen(%cr) %C(yellow)%d%Creset %n%B'
+	fl = log -u
+	f  = "!git ls-files | grep -i"
+	lt = describe --tags --abbrev=0
+	cp = cherry-pick
+	cl = clone
+	co = checkout
+	br = branch
+	quickfix = commit --amend -C HEAD
+	reword = commit --amend -c HEAD
+	diff = diff --word-diff
+	dc = diff --cached
+	grep = grep -Ii
+	unstage = reset HEAD
+	restore = "!git checkout -- $(git status --porcelain | grep ${1} | cut -c 4-); #"
+	cleanall = clean -fdxi
+
+[credential]
+	helper = cache --timeout=3600
+
+[difftool "idea"]
+	cmd = idea diff "$(realpath $LOCAL)" "$(realpath $REMOTE)"
+
+[mergetool "idea"]
+	cmd = idea merge "$(realpath $LOCAL)" "$(realpath $REMOTE)" "$(realpath $BASE)" "$(realpath $MERGED)"
+[push]
+	default = simple
