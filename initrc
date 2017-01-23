@@ -1,14 +1,36 @@
-xrdb -merge ~/.X/defaults &
-/bin/bash -c "sleep 5; xmodmap ~/.X/modmap" &
+#!/bin/sh
+
+if [ -f "/etc/X11/xinit/.Xresources" ]; then
+  xrdb -merge /etc/X11/xinit/.Xresources
+fi
+if [ -f "$HOME/.X/defaults" ]; then
+  xrdb -merge "$HOME/.X/defaults"
+fi
+setxkbmap -layout fr
+if [ -f "/etc/X11/xinit/.Xmodmap" ]; then
+  xmodmap /etc/X11/xinit/.Xmodmap
+fi
+if [ -f "$HOME/.X/modmap" ]; then
+  xmodmap "$HOME/.X/modmap"
+fi
 
 xsetroot -cursor_name left_ptr
-setxkbmap -layout fr
 
-feh --bg-scale ~/.xmonad/wallpaper.jpg
+# Source system xinitrc.d
+if [ -d /etc/X11/xinit/xinitrc.d ] ; then
+ for f in /etc/X11/xinit/xinitrc.d/?*.sh ; do
+  [ -x "$f" ] && . "$f"
+ done
+ unset f
+fi
+
+feh --bg-scale "$HOME/.xmonad/wallpaper.jpg"
 
 touchegg &
 stalonetray &
 [ "$(pidof mpd)" ] || mpd
-compton -b --config ~/.comptonrc
+compton -b --config "$HOME/.comptonrc"
+batterymon -c 10 >/dev/null 2>&1 &
+earlyoom >/dev/null 2>&1 &
 
 exec xmonad
