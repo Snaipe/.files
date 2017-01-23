@@ -12,7 +12,7 @@ no_buffers          yes
 update_interval 1.0
 out_to_console yes
 out_to_x no
-mpd_host /home/snaipe/.mpd/socket
+mpd_host ::1
 mpd_port 6600
 
 TEXT
