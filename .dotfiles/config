@@ -7,9 +7,9 @@
 [alias]
 	cfg    = "!git --git-dir=\"$HOME/.dotfiles/\" --work-tree=\"$HOME\""
 	files  = "!git cfg ls-files"
-	lock   = "!git files | sudo xargs chattr +i"
-	unlock = "!git files | sudo xargs chattr -i"
-	edit   = "!sudo sh -c "
+	lock   = "!git files \"$@\" | sudo xargs chattr +i #"
+	unlock = "!git files \"$@\" | sudo xargs chattr -i #"
+	edit   = "!git unlock \"$@\"; $EDITOR "$@"; git lock \"$@\" #"
 [remote "origin"]
 	url = git@github.com:Snaipe/.dotfiles.git
 	fetch = +refs/heads/*:refs/remotes/origin/*
