@@ -18,7 +18,7 @@ ldpath=(/usr/local/lib /lib /usr/lib $ldpath)
 
 export PAGER=less
 export READNULLCMD=$PAGER
-export LESS=-FRX
+export LESS=-FRSX
 export EDITOR=vim
 
 } >/dev/null 2>&1
