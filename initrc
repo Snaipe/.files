@@ -28,7 +28,6 @@ feh --bg-scale "$HOME/.xmonad/wallpaper.jpg"
 
 touchegg &
 stalonetray &
-[ "$(pidof mpd)" ] || mpd
 compton -b --config "$HOME/.comptonrc"
 batterymon -c 10 >/dev/null 2>&1 &
 earlyoom >/dev/null 2>&1 &
