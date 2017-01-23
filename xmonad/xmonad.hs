@@ -21,6 +21,8 @@ import XMonad.Layout.Reflect
 import XMonad.Layout.Maximize
 import XMonad.Layout.ThreeColumns
 import XMonad.Layout.IM
+import XMonad.Layout.Tabbed
+import XMonad.Layout.TabBarDecoration
 import XMonad.Layout.PerWorkspace (onWorkspace, onWorkspaces)
 import XMonad.Layout.NoBorders
 import XMonad.Layout.Grid
@@ -119,37 +121,6 @@ myManageHook = composeAll . concat $
       myClassIgnores     = ["stalonetray"]
       myResourceIgnores  = ["desktop_window"]
 
-
-------------------------------------------------------------------------
--- Layout Hook
---
-
-fullLayout = noBorders (fullscreenFull Full)
-
-myLayoutHook = maximize $
-               mkToggle (NOBORDERS ?? FULL ?? EOT) $
-               onWorkspace "chat" chatLayout $
-               onWorkspace "gimp" gimpLayout $
-               defaultLayouts
-    where
-      layouts        =
-        spacing 10 (tiled
-          ||| Mirror tiled
-          ||| Full
-          ||| threeCol)
-        ||| fullLayout
-      defaultLayouts = avoidStruts(layouts)
-      chatLayout     = noBorders(avoidStruts(IM (1%5) (Or (Title "Buddy List") (And (Resource "main") (ClassName "pidgin")))
-                       ||| fullLayout))
-      gimpLayout     = noBorders(avoidStruts((withIM (0.12) (Role "gimp-toolbox") $ reflectHoriz $ withIM (0.15) (Role "gimp-dock") Full)))
-
-      tiled    = Tall nmaster delta ratio
-      threeCol = ThreeCol nmaster delta ratio
-      nmaster  = 1
-      delta    = 3/100
-      ratio    = 1/2
-
-
 ------------------------------------------------------------------------
 -- Colors and borders
 --
@@ -175,6 +146,42 @@ myFocusedBorderColor = lightGrey
 
 -- Width of the window border in pixels.
 myBorderWidth = 1
+
+------------------------------------------------------------------------
+-- Layout Hook
+--
+
+fullLayout = noBorders (fullscreenFull Full)
+
+myTabConfig = defaultTheme { inactiveBorderColor = darkGrey
+                           , activeBorderColor = lightGrey
+                           , decoHeight = 50 }
+
+myLayoutHook = maximize $
+               mkToggle (NOBORDERS ?? FULL ?? EOT) $
+               onWorkspace "chat" chatLayout $
+               onWorkspace "gimp" gimpLayout $
+               onWorkspace "games" (avoidStruts(fullLayout)) $
+               defaultLayouts
+    where
+      layouts        =
+        spacing 10 (tiled
+          ||| Mirror tiled
+          ||| tabLay
+          ||| threeCol)
+        ||| fullLayout
+      defaultLayouts = avoidStruts(layouts)
+      chatLayout     = noBorders(avoidStruts(IM (1%5) (Or (Title "Buddy List") (And (Resource "main") (ClassName "pidgin")))
+                       ||| fullLayout))
+      gimpLayout     = noBorders(avoidStruts((withIM (0.12) (Role "gimp-toolbox") $ reflectHoriz $ withIM (0.15) (Role "gimp-dock") Full)))
+
+      tiled    = Tall nmaster delta ratio
+      threeCol = ThreeCol nmaster delta ratio
+      --tabLay   = tabBar shrinkText myTabConfig Top $ Full
+      tabLay   = simpleTabBar $ Full
+      nmaster  = 1
+      delta    = 3/100
+      ratio    = 1/2
 
 ------------------------------------------------------------------------
 -- Key bindings
