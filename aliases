@@ -1,5 +1,7 @@
 # aliases
 
+alias dot="/usr/bin/git --git-dir='$HOME/.dotfiles' --work-tree='$HOME' "
+
 alias sudo="sudo "
 
 alias ls="ls --color=auto"
@@ -8,12 +10,49 @@ alias ll="ls -l"
 alias lla="ll -a"
 alias l="ls"
 alias grep="grep -E --color=auto"
-alias gdb="gdb -q -tui"
+alias gdb="gdb -q"
 alias how="howdoi"
-alias dd="dclfdd"
+alias dd="dcfldd"
 alias dmesg="dmesg -H -Lalways"
 
 alias pymake="python setup.py"
+
+alias netswitch="sudo netctl-auto switch-to"
+alias netreload="sudo systemctl restart 'netctl-auto@*'"
+alias netlist="netctl-auto list"
+
+alias netepita="netreload; netswitch iit-wifi; nsc"
+alias pingg="ping google.com"
+alias pingd="ping 8.8.8.8"
+alias ixio="curl -F 'f:1=<-' ix.io"
+
+alias fixsteam='find ~/.local/share/Steam/ \( -name "*libgcc_s.so*" -o -name "*libstdc++.so*" -o -name "*libxcb.so*" -o -name "*libgpg-error.so*" \) -print -delete'
+
+function dup() {
+    { nohup termite -d $(pwd) >/dev/null 2>&1 & disown %% } >/dev/null 2>&1
+}
+
+alias -g ...="../.."
+alias -g ....="../../.."
+alias -g .....="../../../.."
+alias -g ......="../../../../.."
+alias -g .......="../../../../../.."
+alias -g ........="../../../../../../.."
+alias -g .........="../../../../../../../.."
+alias -g ..........="../../../../../../../../.."
+
+function ncproxy() {
+    mknod backpipe p
+    nohup nc -l -p $1 < backpipe | tee -a in | nc localhost $2 | tee -a ${3:-out.html} > backpipe &
+    rm backpipe
+}
+
+function try() {
+    times=$1; shift
+    for i in $(seq 1 $times); do
+        (eval "$@") || break;
+    done
+}
 
 # functions
 
