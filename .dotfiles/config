@@ -5,5 +5,11 @@
 [status]
 	showUntrackedFiles = no
 [alias]
-	lock   = "!sudo sh -c \"for f in $(git --git-dir="$HOME/.dotfiles/" --work-tree="$HOME" ls-files); do chattr +i \\\"$f\\\"; done\""
-	unlock = "!sudo sh -c \"for f in $(git --git-dir="$HOME/.dotfiles/" --work-tree="$HOME" ls-files); do chattr -i \\\"$f\\\"; done\""
+	cfg    = "!git --git-dir=\"$HOME/.dotfiles/\" --work-tree=\"$HOME\""
+	files  = "!git cfg ls-files"
+	lock   = "!git files | sudo xargs chattr +i"
+	unlock = "!git files | sudo xargs chattr -i"
+	edit   = "!sudo sh -c "
+[remote "origin"]
+	url = git@github.com:Snaipe/.dotfiles.git
+	fetch = +refs/heads/*:refs/remotes/origin/*
