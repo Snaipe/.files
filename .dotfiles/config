@@ -14,9 +14,9 @@
 
 [alias]
     # convenient aliases
-    files  = "!git i-filept"
-    lock   = "!git files \"$@\" | sudo xargs chattr +i #"
-    unlock = "!git files \"$@\" | sudo xargs chattr -i #"
+    files  = "!git i-files"
+    lock   = "!git i-filept \"$@\" | sudo xargs chattr +i #"
+    unlock = "!git i-filept \"$@\" | sudo xargs chattr -i #"
     edit   = "!git i-edit $(git i-filept \"$@\") #"
 
     # internals
@@ -31,10 +31,21 @@
 
     i-splitl  = "!export IFS=\"$(printf '\\n\\r')\"; echo \"$*\" #"
 
-    i-filept  = "!if test $# -eq 0; then "                              \
-                "  git i-cfg ls-files; "                                \
-                "else "                                                 \
-                "  git i-cfg ls-files | sed $(git i-pattern \"$@\"); "  \
+    i-files   = "!if test $# -eq 0; then "                  \
+                "  cmd=\"git i-cfg ls-files\"; " \
+                "else "                                     \
+                "  cmd=\"git i-cfg ls-files " \
+                "       | sed $(git i-pattern \"$@\")\"; " \
+                "fi; " \
+                "$cmd | xargs -I @ git i-mode \"$HOME/@\" \"@\"; #"
+
+    i-filept  = "!if test $# -eq 0; then "              \
+                "  git i-cfg ls-files "                 \
+                "    | sed -e \"s/^/$HOME/g\"; "        \
+                "else "                                 \
+                "  git i-cfg ls-files "                 \
+                "    | sed $(git i-pattern \"$@\") "    \
+                "    | sed -e \"s|^|$HOME/|g\"; "       \
                 "fi #"
 
     i-askpick = "!git i-splitl \"$@\" | cat -n && echo -n 'Pick the one to edit: ' #"
@@ -42,6 +53,14 @@
     i-dopick  = "!git i-askpick \"$@\" "                                        \
                 "  && read PICK "                                               \
                 "  && git i-fedit $(git i-splitl \"$@\" | sed -n $PICK'p') #"
+
+    i-mode    = "!echo $(git i-lockchr \"$1\")$(ls -l \"$1\" 2>/dev/null "  \
+                "   | sed -e '/^total/d' "                                  \
+                "   | head -n1 "                                            \
+                "   | sed -E -e 's/^.(.{9}).*/\\1/g') \"$2\" #"
+
+    i-lockchr = "!lsattr -d \"$1\" 2>/dev/null | sed -E -e 's/^....([i\\-]).*/\\1/g' #"
+
 
     i-locked  = "!lsattr \"$1\" 2>/dev/null | grep -E '^....i.*' >/dev/null #"
 
