@@ -3,9 +3,12 @@
     lockFiles = yes
     matchThreshold = 10
 
-# Push behaviour
+# Push/pull behaviour
 [push]
     default = current
+    recurseSubmodules = on-demand
+[pull]
+    rebase = true
 
 # Track origin/master
 [branch "master"]
@@ -18,14 +21,15 @@
     lock   = "!git i-filept \"$@\" | sudo xargs chattr +i #"
     unlock = "!git i-filept \"$@\" | sudo xargs chattr -i #"
     edit   = "!git i-edit $(git i-filept \"$@\") #"
+    add    = "!echo repl; git add"
 
     # internals
-    i-cfg     = "!git --git-dir=\"$HOME/.dotfiles/\" --work-tree=\"$HOME\""
+    i-cfg     = "!git --git-dir=\"$HOME/.dotfiles/\" "
 
     i-sudo    = "!cmd=\"$1\"; shift; "                      \
                 "sudo -E git "                              \
                 "   --git-dir=\"$HOME/.dotfiles/\" "        \
-                "   --work-tree=\"$HOME\" \"$cmd\" \"$@\" #"
+                "   \"$cmd\" \"$@\" #"
 
     i-pattern = "!printf ' -e \\|%s|!d ' \"$@\" #"
 
@@ -45,7 +49,7 @@
 
     i-filept  = "!if test $# -eq 0; then "              \
                 "  git i-cfg ls-files "                 \
-                "    | sed -e \"s/^/$HOME/g\"; "        \
+                "    | sed -e \"s|^|$HOME/|g\"; "        \
                 "else "                                 \
                 "  git i-cfg ls-files "                 \
                 "    | sed $(git i-pattern \"$@\") "    \
@@ -60,9 +64,9 @@
 
     i-locked  = "!lsattr -d \"$1\" 2>/dev/null | grep -E '^....i.*' >/dev/null #"
 
-    i-feditlk = "!git unlock \"$1\"; "                          \
+    i-feditlk = "!chattr -i \"$1\"; "                          \
                 "sudo -Eu \"$SUDO_USER\" \"$EDITOR\" \"$1\"; "  \
-                "git lock \"$1\" #"
+                "chattr +i \"$1\" #"
 
     i-fedit-l = "!if git i-locked \"$1\"; then "    \
                 "  git i-sudo i-feditlk \"$1\"; "   \
@@ -89,7 +93,13 @@
 [core]
     repositoryformatversion = 0
     filemode = true
-    bare = true
+    worktree = "/home/snaipe"
+    excludesFile = "~/.dotfiles/ignore"
+
+[grep]
+    lineNumber = true
+    patternType = extended
+
 [status]
     showUntrackedFiles = no
 
