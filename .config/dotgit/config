@@ -24,11 +24,11 @@
     add    = "!echo repl; git add"
 
     # internals
-    i-cfg     = "!git --git-dir=\"$HOME/.dotfiles/\" "
+    i-cfg     = "!git --git-dir=\"$HOME/.config/dotgit/\" "
 
     i-sudo    = "!cmd=\"$1\"; shift; "                      \
                 "sudo -E git "                              \
-                "   --git-dir=\"$HOME/.dotfiles/\" "        \
+                "   --git-dir=\"$HOME/.config/dotgit/\" "   \
                 "   \"$cmd\" \"$@\" #"
 
     i-pattern = "!printf ' -e \\|%s|!d ' \"$@\" #"
@@ -94,7 +94,7 @@
     repositoryformatversion = 0
     filemode = true
     worktree = "/home/snaipe"
-    excludesFile = "~/.dotfiles/ignore"
+    excludesFile = "~/.config/dotgit/ignore"
 
 [grep]
     lineNumber = true
