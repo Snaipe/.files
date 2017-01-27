@@ -21,7 +21,6 @@
     lock   = "!git i-filept \"$@\" | sudo xargs chattr +i #"
     unlock = "!git i-filept \"$@\" | sudo xargs chattr -i #"
     edit   = "!git i-edit $(git i-filept \"$@\") #"
-    add    = "!echo repl; git add"
 
     # internals
     i-cfg     = "!git --git-dir=\"$HOME/.config/dotgit/\" "
@@ -42,14 +41,15 @@
                 "fi; "                                                          \
                 "fmt='$(stat --format \"%A %N\" \"@\" | cut -c 2- )'; "         \
                 "if [ \"$(git config dotfiles.lockFiles)\" = yes ]; then "      \
-                "  fmt='$(lsattr -d \"@\" | cut -c 5)'\"$fmt\"; "               \
+                "  fmt='$( (lsattr -d \"@\" 2>/dev/null "                       \
+                "           || echo '----l') | cut -c 5)'\"$fmt\"; "            \
                 "fi; "                                                          \
                 "cd \"$HOME\"; "                                                \
                 "eval $cmd | xargs -I@ sh -c \"echo $fmt\"; #"
 
     i-filept  = "!if test $# -eq 0; then "              \
                 "  git i-cfg ls-files "                 \
-                "    | sed -e \"s|^|$HOME/|g\"; "        \
+                "    | sed -e \"s|^|$HOME/|g\"; "       \
                 "else "                                 \
                 "  git i-cfg ls-files "                 \
                 "    | sed $(git i-pattern \"$@\") "    \
