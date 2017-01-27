@@ -1,0 +1,9 @@
+set selection-clipboard clipboard
+set statusbar-home-tilde true
+set incremental-search true
+set show-v-scrollbar true
+set window-title-basename true
+
+set page-padding 15
+set highlight-active-color "#ed6666"
+set highlight-color "#ffaaaa"
