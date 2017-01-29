@@ -29,7 +29,7 @@ feh --bg-scale "$HOME/.xmonad/wallpaper.jpg"
 touchegg &
 stalonetray &
 compton -b --config "$HOME/.config/comptonrc"
-batterymon -c 10 >/dev/null 2>&1 &
 earlyoom >/dev/null 2>&1 &
+cbatticon -r 10 >/dev/null 2>&1 &
 
 exec xmonad
