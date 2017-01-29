@@ -1,0 +1,8 @@
+[Unit]
+Description=Early Out Of Memory Killer
+
+[Service]
+ExecStart=/usr/bin/earlyoom
+
+[Install]
+WantedBy=default.target
