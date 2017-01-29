@@ -27,7 +27,7 @@ fi
 feh --bg-scale "$HOME/.xmonad/wallpaper.jpg"
 
 touchegg &
-stalonetray &
+stalonetray --config "$HOME/.config/stalonetrayrc" &
 compton -b --config "$HOME/.config/comptonrc"
 earlyoom >/dev/null 2>&1 &
 cbatticon -r 10 >/dev/null 2>&1 &
