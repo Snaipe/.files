@@ -29,7 +29,7 @@ alias ixio="curl -F 'f:1=<-' ix.io"
 alias fixsteam='find ~/.local/share/Steam/ \( -name "*libgcc_s.so*" -o -name "*libstdc++.so*" -o -name "*libxcb.so*" -o -name "*libgpg-error.so*" \) -print -delete'
 
 function dup() {
-    { nohup termite -d $(pwd) >/dev/null 2>&1 & disown %% } >/dev/null 2>&1
+    { nohup termite -d $(pwd) >/dev/null 2>&1 & disown %- } >/dev/null 2>&1
 }
 
 alias -g ...="../.."
