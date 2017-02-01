@@ -246,10 +246,10 @@ myKeys conf@(XConfig {XMonad.modMask = modMask}) = M.fromList $
   , ((modMask, xK_Up), withFocused (sendMessage . maximizeRestore))
 
   -- Change Brightness
-  , ((0,         xF86XK_MonBrightnessUp), spawn "~/bin/backlightctl 15")
-  , ((shiftMask, xF86XK_MonBrightnessUp), spawn "~/bin/backlightctl 5")
-  , ((0,         xF86XK_MonBrightnessDown), spawn "~/bin/backlightctl -15")
-  , ((shiftMask, xF86XK_MonBrightnessDown), spawn "~/bin/backlightctl -5")
+  , ((0,         xF86XK_MonBrightnessUp), spawn "backlightctl 15")
+  , ((shiftMask, xF86XK_MonBrightnessUp), spawn "backlightctl 5")
+  , ((0,         xF86XK_MonBrightnessDown), spawn "backlightctl -15")
+  , ((shiftMask, xF86XK_MonBrightnessDown), spawn "backlightctl -5")
 
   -- Mute volume.
   , ((0,         xF86XK_AudioMute), spawn "amixer -q set Master toggle")
