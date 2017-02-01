@@ -1,0 +1,4 @@
+#!/bin/sh
+filename="$HOME/images/screenshots/$(date '+%F_%X').png"
+scrot "$filename"
+notify-send "Screenshot taken" "Saved in $filename"

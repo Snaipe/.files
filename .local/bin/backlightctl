@@ -1,0 +1,8 @@
+#!/bin/sh
+value=$1; shift
+
+perc=$(xbacklight -get | cut -d. -f1)
+perc=$(expr "$perc" + "$value")
+
+xbacklight $([ $value -gt 0 ] && echo '+')$value'%'
+notify-send " " -i notification-display-brightness-low -h int:value:$perc -h string:x-canonical-private-synchronous:brightness &

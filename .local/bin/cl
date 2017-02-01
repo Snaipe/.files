@@ -1,0 +1,14 @@
+#!/bin/sh
+WINE=${WINE:-wine}
+WINEPREFIX=${WINEPREFIX:-$HOME/.local/share/wineprefixes/psdkwin7}
+export WINEPREFIX
+export WINEDEBUG=fixme-all
+PROGRAMFILES="c:\Program Files (x86)"
+WSDK="$PROGRAMFILES\Microsoft Visual Studio 14.0"
+WPSDK="$PROGRAMFILES\Microsoft SDKs\Windows\v7.0"
+WDXSDK="$PROGRAMFILES\Microsoft DirectX SDK (August 2006)"
+WKSDK="$PROGRAMFILES\Windows Kits"
+export WINEPATH="c:\windows;c:\windows\system32;$WSDK\Common7\IDE;$WSDK\VC\bin"
+export INCLUDE="$WSDK\VC\include;$WPSDK\Include;$WDXSDK\Include;$WKSDK/10/Include/10.0.10240.0/ucrt/"
+export LIB="$WSDK\VC\lib;$WPSDK\Lib;$WDXSDK\Lib\x86"
+$WINE cl.exe "$@"

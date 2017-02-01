@@ -1,0 +1,18 @@
+#!/bin/sh
+echo "Removing exited docker containers (may take a while...)"
+containers="$(docker ps -a -q -f status=exited)"
+if [ -n "$containers" ]; then
+    docker rm -v $containers >/dev/null 2>&1
+fi
+
+echo "Removing dangling docker containers..."
+containers="$(docker images -f "dangling=true" -q)"
+if [ -n "$containers" ]; then
+    docker rmi $containers >/dev/null 2>&1
+fi
+
+echo "Removing dangling volumes..."
+volumes="$(docker volume ls -qf dangling=true)"
+if [ -n "$volumes" ]; then
+    docker volume rm $volumes >/dev/null 2>&1
+fi

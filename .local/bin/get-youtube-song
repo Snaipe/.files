@@ -1,0 +1,1 @@
+youtube-dl --ignore-config -x --audio-format m4a --audio-quality 0 --postprocessor-args '-strict -2' -o "%(title)s.%(ext)s" $@
