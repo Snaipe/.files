@@ -1,0 +1,73 @@
+#!/bin/sh
+
+configdir="${XDG_CONFIG_HOME:-"$HOME/.config"}"/run
+cachedir=${XDG_CACHE_HOME:-"$HOME/.cache"}
+if [ -d "$cachedir" ]; then
+    cache=$cachedir/dmenu_run
+else
+    cache=$HOME/.dmenu_cache # if no xdg dir, fall back to dotfile in ~
+fi
+
+select() {
+    dmenu                                   \
+        -fn 'Meslo LG M DZ for Powerline'   \
+        -y 170 -x 150 -w 1280               \
+        -p '>'                              \
+        -r                                  \
+        -q                                  \
+        -z                                  \
+        -dim 0.7                            \
+        -l 22                               \
+        -nb '#101010'                       \
+        -nf '#cfcfcf'                       \
+        -sb '#ed6666'                       \
+        -sf '#000000'
+}
+
+prepend() {
+    sed -e 's|^|'"$1"'|' $2
+}
+
+actions() {
+    if [ -x "$configdir/actions" ]; then
+        actions=$(grep -E -o '\s*(function\s)?\s*actions_\w*\s*\(\)'    \
+                "$configdir/actions"                                    \
+            | sed -E -e 's/actions_(\w*)\s*\(\)/\1/g'                   \
+            | sort -u)
+        for a in $actions; do
+            if command -V "entries_$a" >/dev/null 2>&1; then
+                "entries_$a"
+            else
+                echo $a
+            fi | prepend 'action: '
+        done
+        unset a;
+    fi
+    cat
+}
+
+run() {
+    IFS=''
+    select="$(head -n1)"
+    type="$(echo $select | cut -d: -f1)"
+    val="$(echo $select | cut -d: -f2- | sed -E -e 's/^\s*//' -e 's/\s*$//')"
+    unset IFS
+
+    case $type in
+        action|act|a)
+            eval actions_$val &;;
+        run|r)
+            eval $val &;;
+    esac
+}
+
+[ -x "$configdir/actions" ] && . $configdir/actions >/dev/null 2>&1
+
+(
+    IFS=:
+    if stest -dqr -n "$cache" $PATH; then
+        stest -flx $PATH | sort -u > "$cache"
+    fi
+    unset IFS
+    cat "$cache" | prepend 'run: ' | actions | select
+) | run

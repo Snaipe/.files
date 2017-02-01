@@ -1,0 +1,28 @@
+#!/bin/sh
+
+actions_screenshot() {
+    sleep 0.1
+    filename=${1:-"$HOME/images/screenshots/$(date '+%F_%X').png"}
+    scrot "$filename"
+    notify-send "Screenshot taken" "Saved in $filename"
+}
+
+actions_mount() {
+    udiskie-mount "/dev/$1" >/dev/null 2>&1
+}
+
+entries_mount() {
+    lsblk --noheadings --raw -o NAME,MOUNTPOINT \
+        | awk '$1~/[[:digit:]]/ && $2 == ""'    \
+        | prepend 'mount '
+}
+
+actions_umount() {
+    udiskie-umount "/dev/$1" >/dev/null 2>&1
+}
+
+entries_umount() {
+    mount | grep -E '/dev/\w+ on /run/media'    \
+          | sed -E -e 's|^/dev/(\w+).*$|\1|'    \
+          | prepend 'umount '
+}
