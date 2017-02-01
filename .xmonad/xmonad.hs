@@ -239,10 +239,6 @@ myKeys conf@(XConfig {XMonad.modMask = modMask}) = M.fromList $
   , ((modMask .|. shiftMask, xK_Up), rotFocusedUp)
   , ((modMask .|. shiftMask, xK_Down), rotFocusedDown)
 
-  -- Lock the screen using xscreensaver.
-  , ((modMask .|. controlMask, xK_l),
-     spawn "xscreensaver-command -lock")
-
   , ((0, xF86XK_Sleep), spawn "systemctl suspend")
   , ((0, xF86XK_ScreenSaver), spawn "i3lock")
 
