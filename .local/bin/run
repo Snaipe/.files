@@ -1,0 +1,14 @@
+#!/bin/sh
+dmenu_run                               \
+    -fn 'Meslo LG M DZ for Powerline'   \
+    -y 170 -x 150 -w 1280               \
+    -p '>'                              \
+    -q                                  \
+    -r                                  \
+    -z                                  \
+    -dim 0.7                            \
+    -l 22                               \
+    -nb '#101010'                       \
+    -nf '#cfcfcf'                       \
+    -sb '#ed6666'                       \
+    -sf '#000000'
