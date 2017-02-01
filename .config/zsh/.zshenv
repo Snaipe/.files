@@ -21,4 +21,14 @@ export READNULLCMD=$PAGER
 export LESS=-FRSX
 export EDITOR=vim
 
+# XDG Stuff
+xdg_vars=($(sed -E                  \
+    -e '/^XDG_/!d'                  \
+    -e 's/XDG_([^_]+)_DIR=.*/\1/'   \
+    .config/user-dirs.dirs))
+
+for v in $xdg_vars; do
+  export XDG_${v}_DIR="$(xdg-user-dir $v)"
+done
+
 } >/dev/null 2>&1
