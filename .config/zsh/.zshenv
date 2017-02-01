@@ -1,20 +1,17 @@
 {
-alias map=typeset -A
-alias bind=typeset -T
-alias var=typeset
-
-typeset -T LD_LIBRARY_PATH ldpath
-typeset -U path ldpath
+typeset -T LD_LIBRARY_PATH ldpath :
 
 export JAVA_HOME="/usr/lib/jvm/default"
-export ANDROID_HOME="/opt/android-sdk"
+export _JAVA_OPTIONS='
+    -Dawt.useSystemAAFontSettings=on
+    -Dswing.aatext=true
+    -Dswing.defaultlaf=com.sun.java.swing.plaf.gtk.GTKLookAndFeel
+    -Dswing.crossplatformlaf=com.sun.java.swing.plaf.gtk.GTKLookAndFeel'
 
-export _JAVA_OPTIONS='-Dawt.useSystemAAFontSettings=on -Dswing.aatext=true -Dswing.defaultlaf=com.sun.java.swing.plaf.gtk.GTKLookAndFeel -Dswing.crossplatformlaf=com.sun.java.swing.plaf.gtk.GTKLookAndFeel'
-export XDG_DESKTOP_DIR="$HOME"
 export GTK_DISABLE_CSD=1
 
-path=(~/bin /usr/bin $ANDROID_HOME/tools $ANDROID_HOME/platform-tools ~/.gem/ruby/2.2.0/bin /opt/gnuarmeclipse/qemu/bin/ $path)
-ldpath=(/usr/local/lib /lib /usr/lib $ldpath)
+path=(~/.local/bin $path /usr/local/bin)
+ldpath=(~/.local/lib $ldpath /usr/local/lib)
 
 export PAGER=less
 export READNULLCMD=$PAGER
