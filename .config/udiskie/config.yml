@@ -1,0 +1,12 @@
+program_options:
+  udisks_version: 2
+  tray: auto
+  menu: smart
+  automount: true
+  notify: true
+
+notifications:
+  timeout: 1.5
+
+notification_actions:
+  device_mounted: []
