@@ -28,6 +28,10 @@ prepend() {
     sed -e 's|^|'"$1"'|' $2
 }
 
+trimspace() {
+    sed -E -e 's/^\s*//' -e 's/\s*$//'
+}
+
 actions() {
     if [ -x "$configdir/actions" ]; then
         actions=$(grep -E -o '\s*(function\s)?\s*actions_\w*\s*\(\)'    \
@@ -56,11 +60,29 @@ apps() {
     cat
 }
 
+wm() {
+    if command -v wmctrl >/dev/null; then
+        wmctrl -d                                   \
+            | grep -E '^[[:digit:]]+[[:space:]]*-'  \
+            | grep -E -o '\w*$'                     \
+            | prepend 'workspace: '
+        wmctrl -l \
+            | grep -E -o "$(hostname) .*$" \
+            | sed -e "s/^$(hostname) //" \
+            | prepend 'window: '
+    fi
+    cat
+}
+
+workspace_from_name() {
+    wmctrl -d | grep -E "$1$" | grep -E -o '^[[:digit:]]+'
+}
+
 run() {
     IFS=''
     select="$(head -n1)"
     type="$(echo $select | cut -d: -f1)"
-    val="$(echo $select | cut -d: -f2- | sed -E -e 's/^\s*//' -e 's/\s*$//')"
+    val="$(echo $select | cut -d: -f2- | trimspace)"
     unset IFS
 
     case $type in
@@ -72,8 +94,10 @@ run() {
             launch=$(grep -E "^Name=\s*$val\s*" -r "/usr/share/applications" \
                 | cut -d: -f1)
             eval $(grep -E "^Exec=.*" $launch \
-                | sed -e 's/^Exec=//' -e 's/%[fFuUdDnNickvm]//g')
+                | sed -e 's/^Exec=//' -e 's/%[fFuUdDnNickvm]//g') &
             ;;
+        workspace|work) wmctrl -s "$(workspace_from_name $val)" &;;
+        window|win) wmctrl -a "$val" &;;
     esac
 }
 
@@ -85,5 +109,5 @@ run() {
         stest -flx $PATH | sort -u > "$cache"
     fi
     unset IFS
-    cat "$cache" | prepend 'run: ' | actions | apps | select
+    cat "$cache" | prepend 'run: ' | actions | apps | wm | select
 ) | run
