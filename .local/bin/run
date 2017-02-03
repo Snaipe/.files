@@ -46,6 +46,16 @@ actions() {
     cat
 }
 
+apps() {
+    if [ -d "/usr/share/applications/" ]; then
+        for f in /usr/share/applications/?*.desktop; do
+            grep -E "^Name=.*" "$f" | sed -e 's/Name=//'
+        done | prepend 'app: '
+        unset f
+    fi
+    cat
+}
+
 run() {
     IFS=''
     select="$(head -n1)"
@@ -58,6 +68,12 @@ run() {
             eval actions_$val &;;
         run|r)
             eval $val &;;
+        app)
+            launch=$(grep -E "^Name=\s*$val\s*" -r "/usr/share/applications" \
+                | cut -d: -f1)
+            eval $(grep -E "^Exec=.*" $launch \
+                | sed -e 's/^Exec=//' -e 's/%[fFuUdDnNickvm]//g')
+            ;;
     esac
 }
 
@@ -69,5 +85,5 @@ run() {
         stest -flx $PATH | sort -u > "$cache"
     fi
     unset IFS
-    cat "$cache" | prepend 'run: ' | actions | select
+    cat "$cache" | prepend 'run: ' | actions | apps | select
 ) | run
