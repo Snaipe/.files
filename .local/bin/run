@@ -51,10 +51,22 @@ actions() {
     cat
 }
 
+desktop_get () {
+    awk -F= -v section="[$2]" -v variable="$3" '
+        $0 == section { in_section = 1; next }
+        in_section && $1 == variable {
+            sub(/^[[:space:]]+/, "")
+            for (i=2; i<=NF; i++) print $i
+            exit
+        }
+        in_section && $1 == "" { exit 1 }
+    ' "$1"
+}
+
 apps() {
     if [ -d "/usr/share/applications/" ]; then
         for f in /usr/share/applications/?*.desktop; do
-            grep -E "^Name=.*" "$f" | sed -e 's/Name=//'
+            desktop_get "$f" 'Desktop Entry' Name
         done | prepend 'app: '
         unset f
     fi
@@ -94,7 +106,7 @@ run() {
         app)
             launch=$(grep -E "^Name=\s*$val\s*" -r "/usr/share/applications" \
                 | cut -d: -f1)
-            eval $(grep -E "^Exec=.*" $launch \
+            eval $(desktop_get "$launch" 'Desktop Entry' Exec       \
                 | sed -e 's/^Exec=//' -e 's/%[fFuUdDnNickvm]//g') &
             ;;
         workspace|work) wmctrl -s "$(workspace_from_name $val)" &;;
