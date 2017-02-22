@@ -21,13 +21,14 @@
     lock   = "!git i-filept \"$@\" | sudo xargs chattr +i #"
     unlock = "!git i-filept \"$@\" | sudo xargs chattr -i #"
     edit   = "!git i-edit $(git i-filept \"$@\") #"
+    profiles = "!git profile list"
 
     # internals
-    i-cfg     = "!git --git-dir=\"$HOME/.config/dotgit/\" "
+    i-cfg     = "!git --git-dir=\"$GIT_DIR\" "
 
     i-sudo    = "!cmd=\"$1\"; shift; "                      \
                 "sudo -E git "                              \
-                "   --git-dir=\"$HOME/.config/dotgit/\" "   \
+                "   --git-dir=\"$GIT_DIR\" "   \
                 "   \"$cmd\" \"$@\" #"
 
     i-pattern = "!printf ' -e \\|%s|!d ' \"$@\" "           \

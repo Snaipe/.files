@@ -1,0 +1,133 @@
+#!/bin/sh -e
+
+usage() {
+    echo <<EOF
+usage: dot profile [<action>] [<options>] <profile-name> [...]
+       dot profile list
+
+global options:
+
+    -h, --help          display this message
+
+actions:
+
+    list                list the available profiles. This runs when no argument
+                        after "profile" is provided.
+
+    select              run a git command against the specified profile.
+                        This is the default action.
+
+    add                 create a profile
+
+    rm                  removes a profile
+        -f, --force     don't ask for confirmation
+
+    link                link an existing profile into the home directory
+        -f, --force     overwrite any staging changes
+
+    unlink              unlink an existing profile from the home directory
+        -f, --force     overwrite any staging changes
+
+EOF
+    exit 0
+}
+
+if [ $# -eq 0 ]; then
+    cmd="list"
+else
+    cmd="select"
+    case "$1" in
+        add|rm|select|link|unlink|list) cmd="$1"; shift;;
+    esac
+fi
+
+i=1
+while [ $i -le $# ]; do
+    eval "arg=\${$i}"
+    case "$arg" in
+        -h|--help) usage;;
+        -f|--force) force=1;;
+        --) shift; break;;
+        -*) >&2 echo "dot: Unsupported option '$arg'."; exit 3;;
+        *) break;;
+    esac
+    shift
+    i=$((i+1))
+done
+unset i
+
+case "$cmd" in
+    list)
+        cd $GIT_DIR/worktrees
+        find . -mindepth 1 -maxdepth 1 -type d  \
+           | grep -E '^./dot-'                  \
+           | sed 's|^./dot-||'
+        exit 0;
+    ;;
+esac
+
+profile=$1; shift
+workdir="$GIT_DIR/worktrees/dot-$profile"
+
+case "$cmd" in
+    add)
+        if [ -d "$workdir" ]; then
+            >&2 echo "dot: Profile '$profile' already exists."
+            exit 3
+        fi
+
+        trap 'rm -rf "$tmpdir"' EXIT
+        tmpdir=$(mktemp -d 2>/dev/null)
+
+        # create a worktree and lock it
+        git worktree add "$tmpdir"/dot-$profile HEAD >/dev/null
+        echo "Creating new profile based on orphan branch dot-$profile."
+        touch "$workdir"/locked
+        echo "Locked new worktree."
+
+        # create an orphan for the new dot profile
+        git --git-dir="$workdir" symbolic-ref HEAD refs/heads/dot-$profile
+        echo "HEAD is now orphaned."
+        rm "$workdir"/index
+        echo "Index has been reset to its empty state."
+    ;;
+    rm)
+        while [ -z "$force" ]; do
+            read -p "Remove profile '$profile' and its associated branch? [y/N]: " yn
+            case $yn in
+                [Yy]*|yes) break;;
+                *) exit 1;;
+            esac
+        done
+
+        rm -rf "$workdir"
+        git branch -D "dot-$profile" 2>/dev/null
+        exit 0
+    ;;
+    select)
+        if [ ! -d "$workdir" ]; then
+            >&2 echo "dot: Unknown profile '$profile'."
+            exit 3
+        fi
+
+        exec git --git-dir="$workdir" "$@"
+    ;;
+    link)
+        if [ ! -d "$workdir" ]; then
+            >&2 echo "dot: Unknown profile '$profile'."
+            exit 3
+        fi
+
+        git --git-dir="$workdir" symbolic-ref HEAD refs/heads/dot-$profile
+        git --git-dir="$workdir" reset --hard HEAD
+    ;;
+    unlink)
+        if [ ! -d "$workdir" ]; then
+            >&2 echo "dot: Unknown profile '$profile'."
+            exit 3
+        fi
+
+        git --git-dir="$workdir" ls-files | xargs rm -fi {} \;
+        rm -rf "$workdir"
+    ;;
+esac
