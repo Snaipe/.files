@@ -3,15 +3,15 @@
 if [ -f "/etc/X11/xinit/.Xresources" ]; then
   xrdb -merge /etc/X11/xinit/.Xresources
 fi
-if [ -f "$HOME/.X/defaults" ]; then
-  xrdb -merge "$HOME/.X/defaults"
+if [ -f "$XDG_CONFIG_HOME/X11/defaults" ]; then
+  xrdb -merge "$XDG_CONFIG_HOME/X11/defaults"
 fi
 setxkbmap -layout fr
 if [ -f "/etc/X11/xinit/.Xmodmap" ]; then
   xmodmap /etc/X11/xinit/.Xmodmap
 fi
-if [ -f "$HOME/.X/modmap" ]; then
-  xmodmap "$HOME/.X/modmap"
+if [ -f "$XDG_CONFIG_HOME/X11/modmap" ]; then
+  xmodmap "$XDG_CONFIG_HOME/X11/modmap"
 fi
 
 xsetroot -cursor_name left_ptr
@@ -29,7 +29,6 @@ feh --bg-scale "$HOME/.xmonad/wallpaper.jpg"
 touchegg &
 stalonetray --config "$HOME/.config/stalonetrayrc" &
 compton -b --config "$HOME/.config/comptonrc"
-earlyoom >/dev/null 2>&1 &
 cbatticon -r 10 >/dev/null 2>&1 &
 
 exec xmonad
