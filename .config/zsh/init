@@ -1,4 +1,4 @@
-HISTFILE="$HOME/.cache/zsh/history"
+HISTFILE="$XDG_CACHE_HOME"/zsh/history
 HISTSIZE=10000000
 SAVEHIST=10000000
 
@@ -17,7 +17,5 @@ setopt HIST_IGNORE_DUPS
 setopt BANG_HIST
 setopt EXTENDED_HISTORY
 setopt INC_APPEND_HISTORY
-
-eval $(dircolors ~/.config/zsh/dircolors)
 
 set mouse=a
