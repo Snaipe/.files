@@ -1,8 +1,19 @@
 #!/bin/sh -e
 
+# always use the current work tree for our profiles
+export GIT_WORK_TREE="$(git rev-parse --show-toplevel)"
+
+# we perform dangerous operations on paths like $GIT_DIR/*, so we
+# check that the variable isn't empty to prevent an unfortunate rm -Rf /.
+if [ -z "$GIT_DIR" ]; then
+    >&2 echo "GIT_DIR is not set; we cannot continue safely."
+    exit 1
+fi
+
 usage() {
     echo <<EOF
 usage: dot profile [<action>] [<options>] <profile-name> [...]
+       dot profile add <profile-name> [<parent-profile>]
        dot profile list
 
 global options:
@@ -17,9 +28,9 @@ actions:
     select              run a git command against the specified profile.
                         This is the default action.
 
-    add                 create a profile
+    add                 create a profile, optionally based on an existing profile.
 
-    rm                  removes a profile
+    rm                  removes a profile.
         -f, --force     don't ask for confirmation
 
     link                link an existing profile into the home directory
@@ -58,10 +69,12 @@ unset i
 
 case "$cmd" in
     list)
-        cd $GIT_DIR/worktrees
-        find . -mindepth 1 -maxdepth 1 -type d  \
-           | grep -E '^./dot-'                  \
-           | sed 's|^./dot-||'
+        if [ -d $GIT_DIR/worktrees ] && [ -x $GIT_DIR/worktrees ]; then
+            cd $GIT_DIR/worktrees
+            find . -mindepth 1 -maxdepth 1 -type d  \
+               | grep -E '^./dot-'                  \
+               | sed 's|^./dot-||'
+        fi
         exit 0;
     ;;
 esac
@@ -76,20 +89,29 @@ case "$cmd" in
             exit 3
         fi
 
+        rev=HEAD
+        if [ -n "$1" ]; then
+            rev=dot-$1
+        fi
+
         trap 'rm -rf "$tmpdir"' EXIT
         tmpdir=$(mktemp -d 2>/dev/null)
 
         # create a worktree and lock it
         git worktree add "$tmpdir"/dot-$profile HEAD >/dev/null
-        echo "Creating new profile based on orphan branch dot-$profile."
+        rm "$workdir"/gitdir
         touch "$workdir"/locked
-        echo "Locked new worktree."
+        echo "Creating new worktree based on imaginary branch dot-$profile."
 
-        # create an orphan for the new dot profile
         git --git-dir="$workdir" symbolic-ref HEAD refs/heads/dot-$profile
-        echo "HEAD is now orphaned."
-        rm "$workdir"/index
-        echo "Index has been reset to its empty state."
+        if [ "$rev" = "HEAD" ]; then
+            echo "HEAD is now orphaned."
+            rm "$workdir"/index
+            echo "Index has been reset to its empty state."
+        else
+            git branch dot-$profile $rev
+            echo "Branch dot-$profile has been created from $rev."
+        fi
     ;;
     rm)
         while [ -z "$force" ]; do
@@ -127,7 +149,17 @@ case "$cmd" in
             exit 3
         fi
 
-        git --git-dir="$workdir" ls-files | xargs rm -fi {} \;
+        if [ -z "$force" ]; then
+            read -p "Remove all files belonging to profile '$profile'? [y/N]: " yn
+            case $yn in
+                [Yy]*|yes);;
+                *) exit 1;;
+            esac
+        fi
+
+        git --git-dir="$workdir" ls-files -z | xargs -0 rm -f
+        git --git-dir="$workdir" ls-tree --name-only -d -r -z HEAD \
+            | sort -rz | xargs -0 rmdir
         rm -rf "$workdir"
     ;;
 esac

@@ -9,6 +9,8 @@
     recurseSubmodules = on-demand
 [pull]
     rebase = true
+[rebase]
+    autoStash = true
 
 # Track origin/master
 [branch "master"]
@@ -21,7 +23,9 @@
     lock   = "!git i-filept \"$@\" | sudo xargs chattr +i #"
     unlock = "!git i-filept \"$@\" | sudo xargs chattr -i #"
     edit   = "!git i-edit $(git i-filept \"$@\") #"
+    profile  = "!exec $GIT_DIR/bin/git-profile "
     profiles = "!git profile list"
+    pf       = "!git profile"
 
     # internals
     i-cfg     = "!git --git-dir=\"$GIT_DIR\" "
