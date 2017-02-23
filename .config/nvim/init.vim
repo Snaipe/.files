@@ -1,6 +1,6 @@
 if !1 | finish | endif
 
-let vimhome = $HOME . '/.nvim'
+let vimhome = $HOME . '/.config/nvim'
 let mapleader=','
 
 if has('vim_starting')
@@ -8,8 +8,10 @@ if has('vim_starting')
     set nocompatible
   endif
 
-  set runtimepath+=~/.nvim/bundle/neobundle.vim/
+  set runtimepath+=~/.config/nvim/bundle/neobundle.vim/
 endif
+
+let g:runafter = []
 
 call neobundle#begin(expand(vimhome . '/bundle/'))
 
@@ -29,3 +31,7 @@ call neobundle#end()
 filetype plugin indent on
 
 NeoBundleCheck
+
+for s:f in g:runafter
+    call s:f()
+endfor

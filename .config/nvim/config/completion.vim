@@ -1,5 +1,7 @@
+NeoBundle 'Shougo/deoplete.nvim'
+
 " Completion
-set omnifunc=syntaxcomplete#Complete
+" set omnifunc=syntaxcomplete#Complete
 set completeopt=longest,menuone
 inoremap <leader>j <C-X><C-O>
 nnoremap <leader>j <C-X><C-O>
@@ -12,3 +14,5 @@ nnoremap <C-@> <C-X><C-O>
 set wildmenu
 set wildmode=list:longest:full
 set wildignore+=*.o,*.aux
+
+let g:deoplete#enable_at_startup = 1
