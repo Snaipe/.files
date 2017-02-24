@@ -291,7 +291,7 @@ myKeys conf@(XConfig {XMonad.modMask = modMask}) = M.fromList $
      spawn "eject -T")
 
   -- Rebind mod + q: custom restart xmonad script
-  , ((modMask, xK_q),
+  , ((appMask, xK_q),
      spawn "killall dzen2 && xmonad --recompile && xmonad --restart")
 
   --------------------------------------------------------------------
@@ -432,13 +432,13 @@ myPrettyPrinter h = dzenPP
   , ppLayout          = dzenColor white mainDark . pad .
                         (\x -> case x of
                           "SimplestFloat"                   -> "Float"
-                          "Maximize Spacing 10 Tall"        -> "^i(.xmonad/icons/layout_tall.xbm)"
-                          "Maximize Spacing 10 Mirror Tall" -> "^i(.xmonad/icons/layout_mirror_tall.xbm)"
-                          "Maximize IM"                     -> "^i(.xmonad/icons/layout_im.xbm)"
-                          "Maximize IM ReflectX IM Full"    -> "^i(.xmonad/icons/layout_gimp.xbm)"
-                          "Maximize Spacing 10 ThreeCol"    -> "^i(.xmonad/icons/layout_threecol.xbm)"
-                          "Maximize Spacing 10 Full"        -> "^i(.xmonad/icons/layout_full.xbm)"
-                          "Maximize Full"                   -> "^i(.xmonad/icons/layout_full.xbm)"
+                          "Maximize Spacing 10 Tall"        -> "^i(.local/share/xmonad/icons/layout_tall.xbm)"
+                          "Maximize Spacing 10 Mirror Tall" -> "^i(.local/share/xmonad/icons/layout_mirror_tall.xbm)"
+                          "Maximize IM"                     -> "^i(.local/share/xmonad/icons/layout_im.xbm)"
+                          "Maximize IM ReflectX IM Full"    -> "^i(.local/share/xmonad/icons/layout_gimp.xbm)"
+                          "Maximize Spacing 10 ThreeCol"    -> "^i(.local/share/xmonad/icons/layout_threecol.xbm)"
+                          "Maximize Spacing 10 Full"        -> "^i(.local/share/xmonad/icons/layout_full.xbm)"
+                          "Maximize Full"                   -> "^i(.local/share/xmonad/icons/layout_full.xbm)"
                           _                                 -> x
                         )
   }
@@ -517,8 +517,8 @@ instance UrgencyHook LibNotifyUrgencyHook where
 
 main = do
   workspaceBar <- spawnDzen myWorkDzen
-  spawnToDzen "conky -c ~/.xmonad/conky/sysinfo" mySysInfoDzen
-  spawnToDzen "conky -c ~/.xmonad/conky/music" myMusicDzen
+  spawnToDzen "conky -c ~/.local/share/xmonad/conky/sysinfo" mySysInfoDzen
+  spawnToDzen "conky -c ~/.local/share/xmonad/conky/music" myMusicDzen
   xmonad $ withUrgencyHook LibNotifyUrgencyHook $ ewmh defaults {
         logHook     = myLogHook workspaceBar
       , manageHook  = manageDocks <+> myManageHook
