@@ -1,8 +1,9 @@
 #!/bin/zsh
 
-# Xinitrc
-export XAUTHORITY="$XDG_RUNTIME_DIR"/Xauthority
-alias startx='/usr/bin/startx "$XDG_CONFIG_HOME"/X11/xinitrc'
-
-# Coreutils
-eval $(dircolors "$XDG_CONFIG_HOME"/dircolors)
+# Source xdg fixes
+if [ -d "$XDG_CONFIG_HOME"/xdg-fixes ] ; then
+ for f in "$XDG_CONFIG_HOME"/xdg-fixes/?*.sh ; do
+  [ -x "$f" ] && . "$f"
+ done
+ unset f
+fi
