@@ -5,7 +5,7 @@
 
 # Push/pull behaviour
 [push]
-    default = current
+    default = matching
     recurseSubmodules = on-demand
 [pull]
     rebase = true
