@@ -55,17 +55,18 @@
                 "  fmt='$( (lsattr -d \"@\" 2>/dev/null "                       \
                 "           || echo '----l') | cut -c 5)'\"$fmt\"; "            \
                 "fi; "                                                          \
-                "cd \"$HOME\"; "                                                \
+                "cd \"$(git rev-parse --show-toplevel)\"; "                     \
                 "eval $cmd | sort | xargs -I@ sh -c \"echo $fmt\"; #"
 
 
-    i-filept  = "!if test $# -eq 0; then "                                      \
+    i-filept  = "!worktree=\"$(git rev-parse --show-toplevel)\"; "              \
+                "if test $# -eq 0; then "                                       \
                 "  lsf='i-cfg ls-files "                                        \
-                "    | sed -e \"s|^|$HOME/|g\"'; "                              \
+                "    | sed -e \"s|^|$worktree/|g\"'; "                          \
                 "else "                                                         \
                 "  lsf='i-cfg ls-files "                                        \
                 "    | sed $(git i-pattern \"$@\") "                            \
-                "    | sed -e \"s|^|$HOME/|g\"'; "                              \
+                "    | sed -e \"s|^|$worktree/|g\"'; "                          \
                 "fi; "                                                          \
                 "cmd=\"( git $lsf; \"; "                                        \
                 "for p in $(git profiles); do "                                 \
