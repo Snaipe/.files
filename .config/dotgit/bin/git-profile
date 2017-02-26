@@ -195,7 +195,7 @@ case "$cmd" in
 
         git --git-dir="$workdir" ls-files -z | xargs -0 rm -f
         git --git-dir="$workdir" ls-tree --name-only -d -r -z HEAD \
-            | sort -rz | xargs -0 rmdir
+            | sort -rz | xargs -0 rmdir 2>/dev/null || true
         rm -rf "$workdir"
     ;;
 esac
