@@ -23,7 +23,12 @@
     lock   = "!git i-filept \"$@\" | sudo xargs chattr +i #"
     unlock = "!git i-filept \"$@\" | sudo xargs chattr -i #"
     edit   = "!git i-edit $(git i-filept \"$@\") #"
-    profile  = "!exec $GIT_DIR/bin/git-profile "
+
+    profile  = "!if [ -f \"$GIT_DIR\"/commondir ]; then "                       \
+               "    export GIT_DIR=\"$GIT_DIR/$(cat \"$GIT_DIR/commondir\")\";" \
+               "fi; "                                                           \
+               "exec \"$GIT_DIR\"/bin/git-profile "
+
     profiles = "!git profile list"
     pf       = "!git profile"
 

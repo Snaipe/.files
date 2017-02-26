@@ -10,6 +10,17 @@ if [ -z "$GIT_DIR" ]; then
     exit 1
 fi
 
+if [ -f "$GIT_DIR"/commondir ]; then
+    export GIT_DIR="$GIT_DIR/$(cat "$GIT_DIR/commondir")"
+fi
+
+export GIT_DIR="$(perl -MCwd -e 'print Cwd::realpath($ENV{GIT_DIR}),qq<\n>')"
+
+if [ -z "$GIT_DIR" ]; then
+    >&2 echo "GIT_DIR is not set; we cannot continue safely."
+    exit 1
+fi
+
 usage() {
     echo <<EOF
 usage: dot profile [<action>] [<options>] <profile-name> [...]
@@ -27,6 +38,8 @@ actions:
 
     select              run a git command against the specified profile.
                         This is the default action.
+
+    switch              switch the selection to the specified profile.
 
     add                 create a profile, optionally based on an existing profile.
 
@@ -48,7 +61,7 @@ if [ $# -eq 0 ]; then
 else
     cmd="select"
     case "$1" in
-        add|rm|select|link|unlink|list) cmd="$1"; shift;;
+        add|rm|select|link|unlink|list|switch) cmd="$1"; shift;;
     esac
 fi
 
@@ -80,7 +93,11 @@ case "$cmd" in
 esac
 
 profile=$1; shift
-workdir="$GIT_DIR/worktrees/dot-$profile"
+if [ "$profile" = master ]; then
+    workdir="$GIT_DIR"
+else
+    workdir="$GIT_DIR/worktrees/dot-$profile"
+fi
 
 case "$cmd" in
     add)
@@ -133,6 +150,11 @@ case "$cmd" in
         fi
 
         exec git --git-dir="$workdir" "$@"
+    ;;
+    switch)
+        repo=$(echo $workdir | sed -e "s|^$GIT_DIR|.|")
+        ln -snf $repo $GIT_DIR/repo
+        echo "Switched to profile '$profile'."
     ;;
     link)
         if [ ! -d "$workdir" ]; then
