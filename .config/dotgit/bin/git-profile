@@ -95,8 +95,10 @@ esac
 profile=$1; shift
 if [ "$profile" = master ]; then
     workdir="$GIT_DIR"
+    branch=master
 else
     workdir="$GIT_DIR/worktrees/dot-$profile"
+    branch="dot-$profile"
 fi
 
 case "$cmd" in
@@ -131,6 +133,10 @@ case "$cmd" in
         fi
     ;;
     rm)
+        if [ "$profile" = master ]; then
+            >&2 echo "dot: Cannot remove master profile."
+            exit 1
+        fi
         while [ -z "$force" ]; do
             read -p "Remove profile '$profile' and its associated branch? [y/N]: " yn
             case $yn in
@@ -157,15 +163,23 @@ case "$cmd" in
         echo "Switched to profile '$profile'."
     ;;
     link)
-        if [ ! -d "$workdir" ]; then
+        if ! git rev-parse --quiet --verify $branch >/dev/null; then
             >&2 echo "dot: Unknown profile '$profile'."
             exit 3
         fi
+        if [ -d "$workdir" ]; then
+            >&2 echo "dot: Profile '$profile' is already linked."
+            exit 3
+        fi
 
-        git --git-dir="$workdir" symbolic-ref HEAD refs/heads/dot-$profile
+        git --git-dir="$workdir" symbolic-ref HEAD refs/heads/$branch
         git --git-dir="$workdir" reset --hard HEAD
     ;;
     unlink)
+        if [ "$profile" = master ]; then
+            >&2 echo "dot: Cannot unlink master profile."
+            exit 3
+        fi
         if [ ! -d "$workdir" ]; then
             >&2 echo "dot: Unknown profile '$profile'."
             exit 3
