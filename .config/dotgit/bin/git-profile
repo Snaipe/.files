@@ -156,8 +156,8 @@ dot_rm() {
 
     rm -rf "$workdir"
 
-    if [ -n "$_branch" ]; then
-        git branch -D $branch || true
+    if [ -n "$_branch" ] && branch_exists "$branch"; then
+        git branch -D $branch
     fi
 }
 
