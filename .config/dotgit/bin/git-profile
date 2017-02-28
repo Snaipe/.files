@@ -146,9 +146,14 @@ dot_rm() {
         ask "Remove all files belonging to profile '$profile'?"
     fi
 
-    git --git-dir="$workdir" ls-files -z | xargs -0 rm -f
-    git --git-dir="$workdir" ls-tree --name-only -d -r -z HEAD \
-        | sort -rz | xargs -0 rmdir 2>/dev/null || true
+    git --git-dir="$workdir" reset
+
+    if branch_exists "$branch"; then
+        git --git-dir="$workdir" ls-files -z | xargs -0 rm -f
+        git --git-dir="$workdir" ls-tree --name-only -d -r -z HEAD \
+            | sort -rz | xargs -0 rmdir 2>/dev/null || true
+    fi
+
     rm -rf "$workdir"
 
     if [ -n "$_branch" ]; then
