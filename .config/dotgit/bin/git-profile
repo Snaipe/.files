@@ -21,181 +21,178 @@ if [ -z "$GIT_DIR" ]; then
     exit 1
 fi
 
-usage() {
-    echo <<EOF
-usage: dot profile [<action>] [<options>] <profile-name> [...]
-       dot profile add <profile-name> [<parent-profile>]
-       dot profile list
+cmd=${1:-ls}
 
-global options:
-
-    -h, --help          display this message
-
-actions:
-
-    list                list the available profiles. This runs when no argument
-                        after "profile" is provided.
-
-    select              run a git command against the specified profile.
-                        This is the default action.
-
-    switch              switch the selection to the specified profile.
-
-    add                 create a profile, optionally based on an existing profile.
-
-    rm                  removes a profile.
-        -f, --force     don't ask for confirmation
-
-    link                link an existing profile into the home directory
-        -f, --force     overwrite any staging changes
-
-    unlink              unlink an existing profile from the home directory
-        -f, --force     overwrite any staging changes
-
+# This function looks fucked up, but works
+getopt() {
+    prelude=$(cat <<-'EOF'
+i=1;
+plain="";
+while [ $i -le $# ]; do
+    eval "arg=\"\${$i}\"";
+    case "$arg" in
 EOF
-    exit 0
+)
+    epilogue=$(cat <<-'EOF'
+        --) break;;
+        -*) >&2 echo "dot: Unsupported option '$arg'."; exit 3;;
+        *) plain="$plain '$arg'";;
+    esac;
+    i=$((i+1));
+done;
+while [ $i -le $# ]; do
+    eval "arg=\"\${$i}\"";
+    plain="$plain '$arg'";
+    i=$((i+1));
+done;
+eval "set $plain"
+EOF
+)
+    args=""
+    for i; do
+        args="$args$i;; "
+    done
+
+    printf '%s' "$prelude $args $epilogue"
 }
 
-if [ $# -eq 0 ]; then
-    cmd="list"
-else
-    cmd="select"
+noopt() {
+    cat <<-'EOF'
     case "$1" in
-        add|rm|select|link|unlink|list|switch) cmd="$1"; shift;;
+        -*) >&2 echo "dot: Unsupported option '$1'."; exit 3;;
     esac
-fi
+EOF
+}
 
-i=1
-while [ $i -le $# ]; do
-    eval "arg=\${$i}"
-    case "$arg" in
-        -h|--help) usage;;
-        -f|--force) force=1;;
-        --) shift; break;;
-        -*) >&2 echo "dot: Unsupported option '$arg'."; exit 3;;
-        *) break;;
+ask() {
+    read -p "$1 [y/N]: " yn
+    case $yn in
+        [Yy]*|yes);;
+        *) exit 1;;
     esac
-    shift
-    i=$((i+1))
-done
-unset i
+}
 
-case "$cmd" in
-    list)
-        if [ -d $GIT_DIR/worktrees ] && [ -x $GIT_DIR/worktrees ]; then
-            cd $GIT_DIR/worktrees
-            find . -mindepth 1 -maxdepth 1 -type d  \
-               | grep -E '^./dot-'                  \
-               | sed 's|^./dot-||'
-        fi
-        exit 0;
-    ;;
-esac
+set_profile() {
+    profile=$1
+    if [ "$profile" = master ]; then
+        workdir="$GIT_DIR"
+        branch=master
+    else
+        workdir="$GIT_DIR/worktrees/dot-$profile"
+        branch="dot-$profile"
+    fi
+}
 
-profile=$1; shift
-if [ "$profile" = master ]; then
-    workdir="$GIT_DIR"
-    branch=master
-else
-    workdir="$GIT_DIR/worktrees/dot-$profile"
-    branch="dot-$profile"
-fi
+mkworktree() {
+    workdir=$1; shift
+    branch=$1
 
-case "$cmd" in
-    add)
-        if [ -d "$workdir" ]; then
-            >&2 echo "dot: Profile '$profile' already exists."
-            exit 3
-        fi
+    trap 'rm -rf "$tmpdir" "$workdir"' EXIT
+    tmpdir=$(mktemp -d 2>/dev/null)
 
-        rev=HEAD
-        if [ -n "$1" ]; then
-            rev=dot-$1
-        fi
+    git worktree add "$tmpdir"/$branch HEAD >/dev/null
+    rm -f "$workdir"/gitdir "$workdir"/index
+    touch "$workdir"/locked
+    git --git-dir="$workdir" symbolic-ref HEAD refs/heads/$branch
 
-        trap 'rm -rf "$tmpdir"' EXIT
-        tmpdir=$(mktemp -d 2>/dev/null)
+    rm -rf "$tmpdir"
+    trap - EXIT
+}
 
-        # create a worktree and lock it
-        git worktree add "$tmpdir"/dot-$profile HEAD >/dev/null
-        rm "$workdir"/gitdir
-        touch "$workdir"/locked
-        echo "Creating new worktree based on imaginary branch dot-$profile."
+branch_exists() {
+    git show-ref --quiet --verify "refs/heads/$1"
+}
 
-        git --git-dir="$workdir" symbolic-ref HEAD refs/heads/dot-$profile
-        if [ "$rev" = "HEAD" ]; then
-            echo "HEAD is now orphaned."
-            rm "$workdir"/index
-            echo "Index has been reset to its empty state."
-        else
-            git branch dot-$profile $rev
-            echo "Branch dot-$profile has been created from $rev."
-        fi
-    ;;
-    rm)
-        if [ "$profile" = master ]; then
-            >&2 echo "dot: Cannot remove master profile."
-            exit 1
-        fi
-        while [ -z "$force" ]; do
-            read -p "Remove profile '$profile' and its associated branch? [y/N]: " yn
-            case $yn in
-                [Yy]*|yes) break;;
-                *) exit 1;;
-            esac
-        done
+# Commands
 
-        rm -rf "$workdir"
-        git branch -D "dot-$profile" 2>/dev/null
+dot_add() {
+    eval $(getopt)
+
+    set_profile "$@"; shift
+    if [ -d "$workdir" ]; then
+        >&2 echo "dot: Profile '$profile' is already linked."
+        exit 3
+    fi
+
+    rev=${1:-$branch}
+
+    mkworktree "$workdir" "$rev"
+    if branch_exists "$rev"; then
+        git --git-dir="$workdir" reset --hard "$rev"
+        echo "Linked profile '$profile' from existing branch '$rev'."
         exit 0
-    ;;
-    select)
-        if [ ! -d "$workdir" ]; then
-            >&2 echo "dot: Unknown profile '$profile'."
-            exit 3
-        fi
+    fi
+    echo "Created new orphan branch '$branch' for profile '$profile'."
+}
 
-        exec git --git-dir="$workdir" "$@"
-    ;;
-    switch)
-        repo=$(echo $workdir | sed -e "s|^$GIT_DIR|.|")
-        ln -snf $repo $GIT_DIR/repo
-        echo "Switched to profile '$profile'."
-    ;;
-    link)
-        if ! git rev-parse --quiet --verify $branch >/dev/null; then
-            >&2 echo "dot: Unknown profile '$profile'."
-            exit 3
-        fi
-        if [ -d "$workdir" ]; then
-            >&2 echo "dot: Profile '$profile' is already linked."
-            exit 3
-        fi
+dot_rm() {
+    eval $(getopt
+        '-f|--force) _force=1'
+        '-b|--branch) _branch=1'
+    )
 
-        git --git-dir="$workdir" symbolic-ref HEAD refs/heads/$branch
-        git --git-dir="$workdir" reset --hard HEAD
-    ;;
-    unlink)
-        if [ "$profile" = master ]; then
-            >&2 echo "dot: Cannot unlink master profile."
-            exit 3
-        fi
-        if [ ! -d "$workdir" ]; then
-            >&2 echo "dot: Unknown profile '$profile'."
-            exit 3
-        fi
+    set_profile "$1"; shift
+    if [ "$profile" = master ]; then
+        >&2 echo "dot: Cannot unlink master profile."
+        exit 3
+    fi
+    if [ ! -d "$workdir" ]; then
+        >&2 echo "dot: Unknown profile '$profile'."
+        exit 3
+    fi
 
-        if [ -z "$force" ]; then
-            read -p "Remove all files belonging to profile '$profile'? [y/N]: " yn
-            case $yn in
-                [Yy]*|yes);;
-                *) exit 1;;
-            esac
-        fi
+    if [ -z "$_force" ]; then
+        ask "Remove all files belonging to profile '$profile'?"
+    fi
 
-        git --git-dir="$workdir" ls-files -z | xargs -0 rm -f
-        git --git-dir="$workdir" ls-tree --name-only -d -r -z HEAD \
-            | sort -rz | xargs -0 rmdir 2>/dev/null || true
-        rm -rf "$workdir"
-    ;;
-esac
+    git --git-dir="$workdir" ls-files -z | xargs -0 rm -f
+    git --git-dir="$workdir" ls-tree --name-only -d -r -z HEAD \
+        | sort -rz | xargs -0 rmdir 2>/dev/null || true
+    rm -rf "$workdir"
+
+    if [ -n "$_branch" ]; then
+        git branch -D $branch || true
+    fi
+}
+
+dot_run() {
+    eval $(noopt)
+    set_profile "$1"; shift
+    eval $(noopt)
+
+    if [ ! -d "$workdir" ]; then
+        >&2 echo "dot: Unknown profile '$profile'."
+        exit 3
+    fi
+
+    exec git --git-dir="$workdir" "$@"
+}
+
+dot_switch() {
+    eval $(getopt)
+
+    set_profile "$1"; shift
+    repo=$(echo $workdir | sed -e "s|^$GIT_DIR|.|")
+    ln -snf $repo $GIT_DIR/repo
+    echo "Switched to profile '$profile'."
+}
+
+dot_ls() {
+    eval $(getopt)
+
+    if [ -d $GIT_DIR/worktrees ] && [ -x $GIT_DIR/worktrees ]; then
+        cd $GIT_DIR/worktrees
+        find . -mindepth 1 -maxdepth 1 -type d  \
+           | grep -E '^./dot-'                  \
+           | sed 's|^./dot-||'
+    fi
+    exit 0;
+}
+
+if ! type dot_$cmd | grep -qi function; then
+    cmd=run
+elif [ $# -ge 1 ]; then
+    shift
+fi
+
+eval "dot_$cmd" "$@"
