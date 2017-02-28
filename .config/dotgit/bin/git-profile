@@ -25,30 +25,31 @@ cmd=${1:-ls}
 
 # This function looks fucked up, but works
 getopt() {
-    prelude=$(cat <<-'EOF'
-i=1;
-plain="";
+    local prelude="$(cat <<-'EOF'
+local i=1 plain;
 while [ $i -le $# ]; do
-    eval "arg=\"\${$i}\"";
+    eval "local arg=\"\${$i}\"";
+    eval "local opt=\"\${$((i+1))}\"";
     case "$arg" in
 EOF
-)
-    epilogue=$(cat <<-'EOF'
-        --) break;;
+)"
+    local epilogue="$(cat <<-'EOF'
+        --) i=$((i+1)); break;;
+        -) plain="$plain '$arg'";;
         -*) >&2 echo "dot: Unsupported option '$arg'."; exit 3;;
         *) plain="$plain '$arg'";;
     esac;
     i=$((i+1));
 done;
 while [ $i -le $# ]; do
-    eval "arg=\"\${$i}\"";
+    eval "local arg=\"\${$i}\"";
     plain="$plain '$arg'";
     i=$((i+1));
 done;
-eval "set $plain"
+eval "set ${plain:-''}"
 EOF
-)
-    args=""
+)"
+    local args="" i
     for i; do
         args="$args$i;; "
     done
@@ -126,9 +127,9 @@ dot_add() {
 }
 
 dot_rm() {
-    eval $(getopt
-        '-f|--force) _force=1'
-        '-b|--branch) _branch=1'
+    eval $(getopt                   \
+        '-f|--force) _force=1'      \
+        '-b|--branch) _branch=1'    \
     )
 
     set_profile "$1"; shift
