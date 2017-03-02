@@ -85,16 +85,24 @@ set_profile() {
 }
 
 mkworktree() {
-    workdir=$1; shift
-    branch=$1
+    workdir="$1"; shift
+    if ! rev="$(git rev-parse --symbolic-full-name --verify --quiet "$1")"; then
+        >&2 echo "dot: Revision '$1' does not exist."
+        exit 1
+    fi
 
     trap 'rm -rf "$tmpdir" "$workdir"' EXIT
     tmpdir=$(mktemp -d 2>/dev/null)
 
-    git worktree add "$tmpdir"/$branch HEAD >/dev/null
+    git worktree add "$tmpdir/dot-$profile" HEAD >/dev/null
     rm -f "$workdir"/gitdir "$workdir"/index
     touch "$workdir"/locked
-    git --git-dir="$workdir" symbolic-ref HEAD refs/heads/$branch
+    if [ -z "$rev" ]; then
+        rev="$(git rev-parse "$1")"
+        git rev-parse $rev > "$workdir"/HEAD
+    else
+        git --git-dir="$workdir" symbolic-ref HEAD $rev
+    fi
 
     rm -rf "$tmpdir"
     trap - EXIT
@@ -102,6 +110,10 @@ mkworktree() {
 
 branch_exists() {
     git show-ref --quiet --verify "refs/heads/$1"
+}
+
+rev_exists() {
+    git rev-parse --verify --quiet "$1" >/dev/null
 }
 
 # Commands
@@ -118,9 +130,9 @@ dot_add() {
     rev=${1:-$branch}
 
     mkworktree "$workdir" "$rev"
-    if branch_exists "$rev"; then
+    if rev_exists "$rev"; then
         git --git-dir="$workdir" reset --hard "$rev"
-        echo "Linked profile '$profile' from existing branch '$rev'."
+        echo "Linked profile '$profile' based off '$rev'."
         exit 0
     fi
     echo "Created new orphan branch '$branch' for profile '$profile'."
@@ -129,7 +141,6 @@ dot_add() {
 dot_rm() {
     eval $(getopt                   \
         '-f|--force) _force=1'      \
-        '-b|--branch) _branch=1'    \
     )
 
     set_profile "$1"; shift
@@ -148,17 +159,13 @@ dot_rm() {
 
     git --git-dir="$workdir" reset
 
-    if branch_exists "$branch"; then
+    if rev_exists "$branch"; then
         git --git-dir="$workdir" ls-files -z | xargs -0 rm -f
         git --git-dir="$workdir" ls-tree --name-only -d -r -z HEAD \
             | sort -rz | xargs -0 rmdir 2>/dev/null || true
     fi
 
     rm -rf "$workdir"
-
-    if [ -n "$_branch" ] && branch_exists "$branch"; then
-        git branch -D $branch
-    fi
 }
 
 dot_run() {
