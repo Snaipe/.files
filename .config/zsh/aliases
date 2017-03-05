@@ -1,6 +1,6 @@
 # aliases
 
-alias dot="/usr/bin/git --git-dir='$HOME/.config/dotgit/repo' "
+alias dot='PATH="$PATH:$HOME/.config/dotgit/bin" /usr/bin/git --git-dir="$HOME/.config/dotgit/repo" '
 
 alias sudo="sudo "
 
