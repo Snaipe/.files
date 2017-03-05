@@ -23,32 +23,32 @@ fi
 
 cmd=${1:-ls}
 
-# This function looks fucked up, but works
 getopt() {
+    # these need to be tab-indented
     local prelude="$(cat <<-'EOF'
-local i=1 plain;
-while [ $i -le $# ]; do
-    eval "local arg=\"\${$i}\"";
-    eval "local opt=\"\${$((i+1))}\"";
-    case "$arg" in
-EOF
-)"
+	local i=1 plain;
+	while [ $i -le $# ]; do
+	    eval "local arg=\"\${$i}\"";
+	    eval "local opt=\"\${$((i+1))}\"";
+	    case "$arg" in
+	EOF
+    )"
     local epilogue="$(cat <<-'EOF'
-        --) i=$((i+1)); break;;
-        -) plain="$plain '$arg'";;
-        -*) >&2 echo "dot: Unsupported option '$arg'."; exit 3;;
-        *) plain="$plain '$arg'";;
-    esac;
-    i=$((i+1));
-done;
-while [ $i -le $# ]; do
-    eval "local arg=\"\${$i}\"";
-    plain="$plain '$arg'";
-    i=$((i+1));
-done;
-eval "set ${plain:-''}"
-EOF
-)"
+	        --) i=$((i+1)); break;;
+	        -) plain="$plain '$arg'";;
+	        -*) >&2 echo "dot: Unsupported option '$arg'."; exit 3;;
+	        *) plain="$plain '$arg'";;
+	    esac;
+	    i=$((i+1));
+	done;
+	while [ $i -le $# ]; do
+	    eval "local arg=\"\${$i}\"";
+	    plain="$plain '$arg'";
+	    i=$((i+1));
+	done;
+	eval "set ${plain:-''}"
+	EOF
+    )"
     local args="" i
     for i; do
         args="$args$i;; "
@@ -59,10 +59,10 @@ EOF
 
 noopt() {
     cat <<-'EOF'
-    case "$1" in
-        -*) >&2 echo "dot: Unsupported option '$1'."; exit 3;;
-    esac
-EOF
+	case "$1" in
+	    -*) >&2 echo "dot: Unsupported option '$1'."; exit 3;;
+	esac
+	EOF
 }
 
 ask() {
