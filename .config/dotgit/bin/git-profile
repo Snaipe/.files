@@ -143,29 +143,31 @@ dot_rm() {
         '-f|--force) _force=1'      \
     )
 
-    set_profile "$1"; shift
-    if [ "$profile" = master ]; then
-        >&2 echo "dot: Cannot unlink master profile."
-        exit 3
-    fi
-    if [ ! -d "$workdir" ]; then
-        >&2 echo "dot: Unknown profile '$profile'."
-        exit 3
-    fi
+    for f; do
+        set_profile "$f"; shift
+        if [ "$profile" = master ]; then
+            >&2 echo "dot: Cannot unlink master profile."
+            exit 3
+        fi
+        if [ ! -d "$workdir" ]; then
+            >&2 echo "dot: Unknown profile '$profile'."
+            exit 3
+        fi
 
-    if [ -z "$_force" ]; then
-        ask "Remove all files belonging to profile '$profile'?"
-    fi
+        if [ -z "$_force" ]; then
+            ask "Remove all files belonging to profile '$profile'?"
+        fi
 
-    git --git-dir="$workdir" reset
+        git --git-dir="$workdir" reset
 
-    if rev_exists "$branch"; then
-        git --git-dir="$workdir" ls-files -z | xargs -0 rm -f
-        git --git-dir="$workdir" ls-tree --name-only -d -r -z HEAD \
-            | sort -rz | xargs -0 rmdir 2>/dev/null || true
-    fi
+        if rev_exists "$branch"; then
+            git --git-dir="$workdir" ls-files -z | xargs -0 rm -f
+            git --git-dir="$workdir" ls-tree --name-only -d -r -z HEAD \
+                | sort -rz | xargs -0 rmdir 2>/dev/null || true
+        fi
 
-    rm -rf "$workdir"
+        rm -rf "$workdir"
+    done
 }
 
 dot_run() {
