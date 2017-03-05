@@ -4,6 +4,8 @@ import System.Exit
 import XMonad
 import Dzen
 
+import XMonad.Config.Desktop
+
 -- Hooks
 import XMonad.Hooks.DynamicLog
 import XMonad.Hooks.UrgencyHook
@@ -159,10 +161,11 @@ myTabConfig = defaultTheme { inactiveBorderColor = darkGrey
 
 myLayoutHook = maximize $
                mkToggle (NOBORDERS ?? FULL ?? EOT) $
+               avoidStruts $
                onWorkspace "chat" chatLayout $
                onWorkspace "gimp" gimpLayout $
-               onWorkspace "games" (avoidStruts(fullLayout)) $
-               defaultLayouts
+               onWorkspace "games" fullLayout $
+               layouts
     where
       layouts        =
         spacing 10 (tiled
@@ -170,10 +173,9 @@ myLayoutHook = maximize $
           ||| tabLay
           ||| threeCol)
         ||| fullLayout
-      defaultLayouts = avoidStruts(layouts)
-      chatLayout     = noBorders(avoidStruts(IM (1%5) (Or (Title "Buddy List") (And (Resource "main") (ClassName "pidgin")))
-                       ||| fullLayout))
-      gimpLayout     = noBorders(avoidStruts((withIM (0.12) (Role "gimp-toolbox") $ reflectHoriz $ withIM (0.15) (Role "gimp-dock") Full)))
+      chatLayout     = noBorders(IM (1%5) (Or (Title "Buddy List") (And (Resource "main") (ClassName "pidgin")))
+                       ||| fullLayout)
+      gimpLayout     = noBorders((withIM (0.12) (Role "gimp-toolbox") $ reflectHoriz $ withIM (0.15) (Role "gimp-dock") Full))
 
       tiled    = Tall nmaster delta ratio
       threeCol = ThreeCol nmaster delta ratio
@@ -291,7 +293,7 @@ myKeys conf@(XConfig {XMonad.modMask = modMask}) = M.fromList $
      spawn "eject -T")
 
   -- Rebind mod + q: custom restart xmonad script
-  , ((appMask, xK_q),
+  , ((modMask, xK_q),
      spawn "killall dzen2 && xmonad --recompile && xmonad --restart")
 
   --------------------------------------------------------------------
@@ -460,7 +462,7 @@ myDzen = DzenConf {
     font       = Just myDzenFont
   , bg_color   = Just mainDark
   , exec       = ["button2=;"]
-  , addargs    = []
+  , addargs    = ["-dock"]
 }
 
 -- Workspace dzen bar
@@ -519,7 +521,7 @@ main = do
   workspaceBar <- spawnDzen myWorkDzen
   spawnToDzen "conky -c ~/.local/share/xmonad/conky/sysinfo" mySysInfoDzen
   spawnToDzen "conky -c ~/.local/share/xmonad/conky/music" myMusicDzen
-  xmonad $ withUrgencyHook LibNotifyUrgencyHook $ ewmh defaults {
+  xmonad $ docks $ withUrgencyHook LibNotifyUrgencyHook $ ewmh defaults {
         logHook     = myLogHook workspaceBar
       , manageHook  = manageDocks <+> myManageHook
       , startupHook = setWMName "LG3D"
@@ -529,7 +531,7 @@ main = do
 ------------------------------------------------------------------------
 -- Combine it all together
 --
-defaults = defaultConfig {
+defaults = desktopConfig {
     -- simple stuff
     terminal           = myTerminal,
     focusFollowsMouse  = myFocusFollowsMouse,
