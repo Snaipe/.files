@@ -201,7 +201,7 @@ dot_ls() {
            | grep -E '^./dot-'                  \
            | sed 's|^./dot-||'
     fi
-    exit 0;
+    echo "master"
 }
 
 if ! type dot_$cmd | grep -qi function; then
