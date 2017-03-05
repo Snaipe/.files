@@ -24,20 +24,15 @@
     unlock = "!git i-filept \"$@\" | sudo xargs chattr -i #"
     edit   = "!git i-edit $(git i-filept \"$@\") #"
 
-    profile  = "!if [ -f \"$GIT_DIR\"/commondir ]; then "                       \
-               "    export GIT_DIR=\"$GIT_DIR/$(cat \"$GIT_DIR/commondir\")\";" \
-               "fi; "                                                           \
-               "exec \"$GIT_DIR\"/bin/git-profile "
-
-    profiles = "!git profile list"
-    pf       = "!git profile"
+    profiles = profile ls
+    pf       = profile
 
     # internals
     i-cfg     = "!git --git-dir=\"$GIT_DIR\" "
 
     i-sudo    = "!cmd=\"$1\"; shift; "                      \
                 "sudo -E git "                              \
-                "   --git-dir=\"$GIT_DIR\" "   \
+                "   --git-dir=\"$GIT_DIR\" "                \
                 "   \"$cmd\" \"$@\" #"
 
     i-pattern = "!printf ' -e \\|%s|!d ' \"$@\" "           \
