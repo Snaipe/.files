@@ -3,6 +3,9 @@
     lockFiles = yes
     matchThreshold = 10
 
+[apk]
+    branch = edge
+
 # Push/pull behaviour
 [push]
     default = matching
