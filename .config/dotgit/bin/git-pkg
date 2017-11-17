@@ -120,15 +120,27 @@ bootstrap() {
         [Yy]*) ;;
         *) exit 1;;
     esac
+
+    if ! has_patchelf="$(type -p patchelf 2>/dev/null)" || [ -z "$has_patchelf" ]; then
+        >&2 echo "patchelf was not found. Please install patchelf for dot-pkg to work."
+    fi
+
     trap "rm -f -- \"$GIT_DIR\"/sbin/apk.static; rmdir -- \"$GIT_DIR\"/sbin 2>/dev/null" EXIT
     curl_install apk-tools-static 2.8.1-r1 "$GIT_DIR" sbin/apk.static
+
     set +e
+    >&2 echo "Bootstrapping subsystem..."
     run_apk "$GIT_DIR"/sbin/apk.static "" --allow-untrusted update
     run_apk "$GIT_DIR"/sbin/apk.static "" --allow-untrusted add "$@" >/dev/null 2>&1
     set -e
+
+    >&2 echo "Patching bootstrapped ELFs..."
     patch_pkgs "$GIT_DIR/sbin/apk.static" "$@"
+
+    >&2 echo "Fixing installation..."
     run_apk "$root/$apk_exe" "$fakerootlib" --allow-untrusted fix
     patch_new "$GIT_DIR/sbin/apk.static"
+
     >&2 echo "Done."
 }
 
