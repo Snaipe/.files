@@ -41,20 +41,15 @@ apk_flags="
     --cache-dir=\"$cachedir\"
 "
 
+fakerootbin="$root/usr/bin/fakeroot"
+fakedbin="$root/usr/bin/faked"
 fakerootlib="$root/usr/lib/libfakeroot.so"
 
 do_apk_fakeroot() {
     local apk_exe="$1"; shift
-    local fakelib="$1"; shift
-    eval set -- $apk_flags $@
-    if [ -n "$fakelib" ]; then
-        fakeroot --lib "$fakelib" -- "$apk_exe" "$@"
-        ret="$?"
-    else
-        fakeroot -- "$apk_exe" "$@"
-        ret="$?"
-    fi
-    return "$ret"
+
+    eval set -- "$apk_exe" $apk_flags "$@"
+    "$fakerootbin" --lib "$fakerootlib" --faked "$fakedbin" -- "$@"
 }
 
 do_apk() {
@@ -66,7 +61,7 @@ do_apk() {
 patch_pkgs() {
     local apk_exe="$1"; shift
     for elf in $(do_apk "$apk_exe" info --allow-untrusted -L -- "$@" | tail -n +2 | grep -E '(usr/)?(s?bin|libexec|lib(32|64)?/\w+\.so)'); do
-        if ! patchelf --print-soname $root/$elf >/dev/null 2>&1; then
+        if ! patchelf "$root/$elf" >/dev/null 2>&1; then
             continue
         fi
 
@@ -109,9 +104,7 @@ patch_new() {
 }
 
 run_apk() {
-    local apk_exe="$1"; shift
-    local fakelib="$1"; shift
-    do_apk_fakeroot "$apk_exe" "$fakelib" "$@"
+    do_apk_fakeroot "$root/$apk_exe" "$@"
 }
 
 bootstrap() {
@@ -130,15 +123,15 @@ bootstrap() {
 
     set +e
     >&2 echo "Bootstrapping subsystem..."
-    run_apk "$GIT_DIR"/sbin/apk.static "" --allow-untrusted update
-    run_apk "$GIT_DIR"/sbin/apk.static "" --allow-untrusted add "$@" >/dev/null 2>&1
+    do_apk "$GIT_DIR"/sbin/apk.static --allow-untrusted update
+    do_apk "$GIT_DIR"/sbin/apk.static --allow-untrusted add "$@" >/dev/null 2>&1
     set -e
 
     >&2 echo "Patching bootstrapped ELFs..."
     patch_pkgs "$GIT_DIR/sbin/apk.static" "$@"
 
     >&2 echo "Fixing installation..."
-    run_apk "$root/$apk_exe" "$fakerootlib" --allow-untrusted fix
+    run_apk --allow-untrusted fix
     patch_new "$GIT_DIR/sbin/apk.static"
 
     >&2 echo "Done."
@@ -159,11 +152,6 @@ touch -- \
     "$root/etc/apk/world.prev" \
     "$root/lib/apk/db/lock"
 
-if [ ! -x $root/sbin/apk ]; then
-    bootstrap apk-tools alpine-keys fakeroot
-    run_apk "$root/$apk_exe" "$fakerootlib" add patchelf
-fi
-
 if [ ! -f "$root/etc/apk/repositories" ]; then
     cat <<-EOF > "$root/etc/apk/repositories"
 	@edge http://dl-cdn.alpinelinux.org/alpine/edge/main
@@ -171,6 +159,12 @@ if [ ! -f "$root/etc/apk/repositories" ]; then
 	EOF
 fi
 
+if [ ! -x $root/sbin/apk ]; then
+    bootstrap apk-tools alpine-keys fakeroot
+    run_apk add patchelf
+    patch_new "$root/$apk_exe"
+fi
+
 set +e
-run_apk "$root/$apk_exe" "$fakerootlib" "$@"
+run_apk "$@"
 patch_new "$root/$apk_exe"
