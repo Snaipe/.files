@@ -15,30 +15,30 @@ alpine_cdn="http://dl-cdn.alpinelinux.org/alpine/$branch"
 apk_exe=sbin/apk
 
 if [ -z "$GIT_DIR" ]; then
-    >&2 echo "GIT_DIR is not set; we cannot continue safely."
-    exit 1
+	>&2 echo "GIT_DIR is not set; we cannot continue safely."
+	exit 1
 fi
 
 if [ -f "$GIT_DIR"/commondir ]; then
-    export GIT_DIR="$GIT_DIR/$(cat "$GIT_DIR/commondir")"
+	export GIT_DIR="$GIT_DIR/$(cat "$GIT_DIR/commondir")"
 fi
 
 export GIT_DIR="$(perl -MCwd -e 'print Cwd::realpath($ENV{GIT_DIR}),qq<\n>')"
 export PATH="$root/bin:$root/sbin:$root/usr/bin:$PATH"
 
 curl_install() {
-    local pkg="$1"; shift
-    local ver="$1"; shift
-    local dest="$1"; shift
-    curl --progress -L "$alpine_cdn/main/$arch/$pkg-$ver.apk" | tar --warning=no-unknown-keyword -C "$dest" -xzf - "$@"
+	local pkg="$1"; shift
+	local ver="$1"; shift
+	local dest="$1"; shift
+	curl --progress -L "$alpine_cdn/main/$arch/$pkg-$ver.apk" | tar --warning=no-unknown-keyword -C "$dest" -xzf - "$@"
 }
 
 apk_flags="
-    --repository=\"$alpine_cdn/main\"
-    --repository=\"$alpine_cdn/community\"
-    --arch=\"$arch\"
-    --root=\"$root\"
-    --cache-dir=\"$cachedir\"
+	--repository=\"$alpine_cdn/main\"
+	--repository=\"$alpine_cdn/community\"
+	--arch=\"$arch\"
+	--root=\"$root\"
+	--cache-dir=\"$cachedir\"
 "
 
 fakerootbin="$root/usr/bin/fakeroot"
@@ -46,95 +46,95 @@ fakedbin="$root/usr/bin/faked"
 fakerootlib="$root/usr/lib/libfakeroot.so"
 
 do_apk_fakeroot() {
-    local apk_exe="$1"; shift
+	local apk_exe="$1"; shift
 
-    eval set -- "$apk_exe" $apk_flags "$@"
-    "$fakerootbin" --lib "$fakerootlib" --faked "$fakedbin" -- "$@"
+	eval set -- "$apk_exe" $apk_flags "$@"
+	"$fakerootbin" --lib "$fakerootlib" --faked "$fakedbin" -- "$@"
 }
 
 do_apk() {
-    local apk_exe="$1"; shift
-    eval set -- $apk_flags $@
-    "$apk_exe" "$@"
+	local apk_exe="$1"; shift
+	eval set -- $apk_flags $@
+	"$apk_exe" "$@"
 }
 
 patch_pkgs() {
-    local apk_exe="$1"; shift
-    for elf in $(do_apk "$apk_exe" info --allow-untrusted -L -- "$@" | tail -n +2 | grep -E '(usr/)?(s?bin|libexec|lib(32|64)?/\w+\.so)'); do
-        if ! patchelf "$root/$elf" >/dev/null 2>&1; then
-            continue
-        fi
+	local apk_exe="$1"; shift
+	for elf in $(do_apk "$apk_exe" info --allow-untrusted -L -- "$@" | tail -n +2 | grep -E '(usr/)?(s?bin|libexec|lib(32|64)?/\w+\.so)'); do
+		if ! patchelf "$root/$elf" >/dev/null 2>&1; then
+			continue
+		fi
 
-        if interp=$(patchelf --print-interpreter $root/$elf 2>/dev/null); then
-            case "$interp" in
-                "$root"/*) ;;
-                /*)
-                    patchelf --set-interpreter $root/${interp#?} $root/$elf
-                    ;;
-            esac
-        fi
+		if interp=$(patchelf --print-interpreter $root/$elf 2>/dev/null); then
+			case "$interp" in
+				"$root"/*) ;;
+				/*)
+					patchelf --set-interpreter $root/${interp#?} $root/$elf
+					;;
+			esac
+		fi
 
-        if rpath=$(patchelf --print-rpath $root/$elf 2>/dev/null); then
-            case "$rpath" in
-                "$root"/*) ;;
-                \$ORIGIN*) ;;
-                "")
-                    patchelf --set-rpath \$ORIGIN/../lib $root/$elf
-                    ;;
-                /*)
-                    patchelf --set-rpath $root/${rpath#?} $root/$elf
-                    ;;
-            esac
-        fi
-    done
+		if rpath=$(patchelf --print-rpath $root/$elf 2>/dev/null); then
+			case "$rpath" in
+				"$root"/*) ;;
+				\$ORIGIN*) ;;
+				"")
+					patchelf --set-rpath \$ORIGIN/../lib $root/$elf
+					;;
+				/*)
+					patchelf --set-rpath $root/${rpath#?} $root/$elf
+					;;
+			esac
+		fi
+	done
 }
 
 patch_new() {
-    local apk_exe="$1"; shift
-    if ! diff "$root/etc/apk/world" "$root/etc/apk/world.prev" >/dev/null 2>&1; then
-        local pkglist="${XDG_CACHE_HOME:-$HOME/.cache}"/apk-packages
-        do_apk "$apk_exe" info | sort >$pkglist
-        local pkgs="$(comm -13 "$root/etc/apk/all-pkgs" "$pkglist" | cut -d@ -f1)"
-        if [ -n "$pkgs" ]; then
-            patch_pkgs "$apk_exe" $pkgs
-        fi
-        cp "$pkglist" "$root/etc/apk/all-pkgs"
-        cp "$root/etc/apk/world" "$root/etc/apk/world.prev"
-    fi
+	local apk_exe="$1"; shift
+	if ! diff "$root/etc/apk/world" "$root/etc/apk/world.prev" >/dev/null 2>&1; then
+		local pkglist="${XDG_CACHE_HOME:-$HOME/.cache}"/apk-packages
+		do_apk "$apk_exe" info | sort >$pkglist
+		local pkgs="$(comm -13 "$root/etc/apk/all-pkgs" "$pkglist" | cut -d@ -f1)"
+		if [ -n "$pkgs" ]; then
+			patch_pkgs "$apk_exe" $pkgs
+		fi
+		cp "$pkglist" "$root/etc/apk/all-pkgs"
+		cp "$root/etc/apk/world" "$root/etc/apk/world.prev"
+	fi
 }
 
 run_apk() {
-    do_apk_fakeroot "$root/$apk_exe" "$@"
+	do_apk_fakeroot "$root/$apk_exe" "$@"
 }
 
 bootstrap() {
-    read -p "APK not installed -- install it from Alpine $branch for $arch? [y/N]: " yn
-    case $yn in
-        [Yy]*) ;;
-        *) exit 1;;
-    esac
+	read -p "APK not installed -- install it from Alpine $branch for $arch? [y/N]: " yn
+	case $yn in
+		[Yy]*) ;;
+		*) exit 1;;
+	esac
 
-    if ! has_patchelf="$(type -p patchelf 2>/dev/null)" || [ -z "$has_patchelf" ]; then
-        >&2 echo "patchelf was not found. Please install patchelf for dot-pkg to work."
-    fi
+	if ! has_patchelf="$(type -p patchelf 2>/dev/null)" || [ -z "$has_patchelf" ]; then
+		>&2 echo "patchelf was not found. Please install patchelf for dot-pkg to work."
+	fi
 
-    trap "rm -f -- \"$GIT_DIR\"/sbin/apk.static; rmdir -- \"$GIT_DIR\"/sbin 2>/dev/null" EXIT
-    curl_install apk-tools-static 2.8.1-r1 "$GIT_DIR" sbin/apk.static
+	trap "rm -f -- \"$GIT_DIR\"/sbin/apk.static; rmdir -- \"$GIT_DIR\"/sbin 2>/dev/null" EXIT
+	curl_install apk-tools-static 2.8.1-r1 "$GIT_DIR" sbin/apk.static
 
-    set +e
-    >&2 echo "Bootstrapping subsystem..."
-    do_apk "$GIT_DIR"/sbin/apk.static --allow-untrusted update
-    do_apk "$GIT_DIR"/sbin/apk.static --allow-untrusted add "$@" >/dev/null 2>&1
-    set -e
+	set +e
+	>&2 echo "Bootstrapping subsystem..."
+	do_apk "$GIT_DIR"/sbin/apk.static --allow-untrusted update
+	do_apk "$GIT_DIR"/sbin/apk.static --allow-untrusted add "$@" >/dev/null 2>&1
+	set -e
 
-    >&2 echo "Patching bootstrapped ELFs..."
-    patch_pkgs "$GIT_DIR/sbin/apk.static" "$@"
+	>&2 echo "Patching bootstrapped ELFs..."
+	patch_pkgs "$GIT_DIR/sbin/apk.static" "$@"
 
-    >&2 echo "Fixing installation..."
-    run_apk --allow-untrusted fix
-    patch_new "$GIT_DIR/sbin/apk.static"
+	>&2 echo "Fixing installation..."
+	run_apk --allow-untrusted fix
+	patch_new "$GIT_DIR/sbin/apk.static"
 
-    >&2 echo "Done."
+	>&2 echo "Done."
 }
 
 mkdir -p -- "$root"
@@ -142,27 +142,27 @@ mkdir -p -- "$root"
 ln -s usr/bin "$root/bin" 2>/dev/null || true
 
 mkdir -p -- \
-    "$root/etc/apk" \
-    "$root/lib/apk/db" \
-    "$cachedir"
+	"$root/etc/apk" \
+	"$root/lib/apk/db" \
+	"$cachedir"
 
 touch -- \
-    "$root/etc/apk/all-pkgs" \
-    "$root/etc/apk/world" \
-    "$root/etc/apk/world.prev" \
-    "$root/lib/apk/db/lock"
+	"$root/etc/apk/all-pkgs" \
+	"$root/etc/apk/world" \
+	"$root/etc/apk/world.prev" \
+	"$root/lib/apk/db/lock"
 
 if [ ! -f "$root/etc/apk/repositories" ]; then
-    cat <<-EOF > "$root/etc/apk/repositories"
+	cat <<-EOF > "$root/etc/apk/repositories"
 	@edge http://dl-cdn.alpinelinux.org/alpine/edge/main
 	@edge http://dl-cdn.alpinelinux.org/alpine/edge/community
 	EOF
 fi
 
 if [ ! -x $root/sbin/apk ]; then
-    bootstrap apk-tools alpine-keys fakeroot
-    run_apk add patchelf
-    patch_new "$root/$apk_exe"
+	bootstrap apk-tools alpine-keys fakeroot
+	run_apk add patchelf
+	patch_new "$root/$apk_exe"
 fi
 
 set +e
