@@ -27,7 +27,6 @@ if [ -f "$GIT_DIR"/commondir ]; then
 fi
 
 export GIT_DIR="$(perl -MCwd -e 'print Cwd::realpath($ENV{GIT_DIR}),qq<\n>')"
-export PATH="$root/bin:$root/sbin:$root/usr/bin:$PATH"
 
 curl_install() {
 	local branch="$1"; shift
@@ -74,6 +73,7 @@ do_apk() {
 
 patch_pkgs() {
 	local apk_exe="$1"; shift
+	local do_wrap="$1"; shift
 	for file in $(do_apk "$apk_exe" info --allow-untrusted -L -- "$@" | tail -n +2); do
 		file="$root/$file"
 
@@ -96,12 +96,19 @@ patch_pkgs() {
 			continue
 		fi
 
+		# patchelf patching itself is a special case
+		case "$file" in
+			"$root"/usr/bin/patchelf)
+				cp "$file" "$file.patched"
+				file="$file.patched";;
+		esac
+
 		echo "Patching $file"
 		perms=$(stat -c "%a" "$file")
 		trap "chmod $perms '$file'" EXIT 1 2 3 6 15
 		chmod +w "$file"
 
-		if ! ( patchelf --print-needed "$file" | grep -Fqx "$wrapper" ); then
+		if [ "$do_wrap" == "1" ] && ! ( patchelf --print-needed "$file" | grep -Fqx "$wrapper" ); then
 			patchelf --add-needed "$wrapper" "$file"
 		fi
 
@@ -139,6 +146,10 @@ patch_pkgs() {
 
 		trap - EXIT 1 2 3 6 15
 		chmod $perms "$file"
+
+		case "$file" in
+			*.patched) mv "$file" "${file%.patched}";;
+		esac
 	done
 }
 
@@ -163,7 +174,7 @@ patch_new() {
 	if [ -n "$explicit_pkgs" ]; then
 		local pkgs="$(comm -13 "$root/etc/apk/all-pkgs" "$pkglist" | cut -d@ -f1)"
 		if [ -n "$pkgs" ]; then
-			patch_pkgs "$apk_exe" $pkgs
+			patch_pkgs "$apk_exe" 1 $pkgs
 		fi
 	fi
 	if [ -s "$pkglist" ]; then
@@ -185,6 +196,9 @@ run_apk() {
 }
 
 bootstrap() {
+	# strip our target environment from the PATH to avoid issues
+	export PATH=$(echo "$PATH" | sed -E "s|$HOME/[^:]+||g" | tr -s :)
+
 	read -p "APK not installed -- install it from Alpine $branch for $arch? [y/N]: " yn
 	case $yn in
 		[Yy]*) ;;
@@ -235,7 +249,7 @@ bootstrap() {
 	set -e
 
 	>&2 echo "Patching bootstrapped ELFs..."
-	patch_pkgs "$sapk" "$@"
+	patch_pkgs "$sapk" 0 "$@"
 
 	mkdir -p "$(dirname "$wrapper")"
 
@@ -244,7 +258,12 @@ bootstrap() {
 
 	>&2 echo "Fixing installation..."
 	run_apk --allow-untrusted fix
-	patch_pkgs "$sapk" "$@"
+	# We still have to stick with the (possibly broken) system patchelf
+	patch_pkgs "$sapk" 0 "$@"
+
+	# Now actually use our own patchelf
+	export PATH="$root/bin:$root/sbin:$root/usr/bin:$PATH"
+	patch_pkgs "$sapk" 1 "$@"
 	patch_new "$sapk"
 
 	trap "$rmtmp" $traps
@@ -255,9 +274,10 @@ bootstrap() {
 mkdir -p -- "$root" "$cachedir"
 
 if [ ! -x $root/sbin/apk ]; then
-	bootstrap apk-tools alpine-keys fakeroot
-	run_apk add patchelf
+	bootstrap apk-tools alpine-keys fakeroot patchelf
 	patch_new "$root/$apk_exe"
+else
+	export PATH="$root/bin:$root/sbin:$root/usr/bin:$PATH"
 fi
 
 set +e
