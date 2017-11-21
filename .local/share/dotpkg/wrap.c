@@ -40,7 +40,7 @@ void init(void)
 
 static void translate_path(const char **pathname, char *newpath)
 {
-	if ((*pathname)[0] != '/')
+	if (!*pathname || (*pathname)[0] != '/')
 		return;
 
 #ifdef DEBUG
