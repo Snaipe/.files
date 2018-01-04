@@ -13,3 +13,6 @@ map! <leader>c <ESC>:let @/ = ""<CR>
 
 " Search/Replace preview
 set inccommand=split
+
+" Visual selection search
+vnoremap // y/<C-R>"<CR>N
