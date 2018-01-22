@@ -20,15 +20,15 @@ prompt_segment() {
 }
 
 prompt_context() {
-	prompt_segment black default '%{%F{blue}%}%n%{%F{red}%}@%{%F{green}%}%M'
+	prompt_segment green black '%{%F{black}%}%n%{%F{magenta}%}@'"$(hostname | cut -d. -f1)"
 }
 
 prompt_status() {
-	prompt_segment magenta black "%(?,,%{%F{red}%}✘ )%(!,%{%F{yellow}%}⚡ ,)%(1j,%{%F{cyan}%}%j ⚙ ,)"
+	prompt_segment green black "%(?,,%{%F{red}%}✘ )%(!,%{%F{yellow}%}⚡ ,)%(1j,%{%F{blue}%}%j ⚙ ,)"
 }
 
 prompt_dir() {
-	prompt_segment magenta black '%2%~' -P
+	prompt_segment green black '%2%~' -P
 }
 
 prompt_end() {
@@ -42,7 +42,7 @@ prompt_end() {
 }
 
 build_prompt() {
-	#prompt_context
+	prompt_context
 	prompt_status
 	prompt_dir
 	echo -n " >"

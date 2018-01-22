@@ -1,19 +1,20 @@
 # aliases
 
-alias dot='PATH="$PATH:$HOME/.config/dotgit/bin" /usr/bin/git --git-dir="$HOME/.config/dotgit/repo" '
-
-alias sudo="sudo "
+alias sudo="sudo -E "
 
 alias ls="ls --color=auto"
-alias lsa="ls -a"
+alias la="ls -a"
 alias ll="ls -l"
 alias lla="ll -a"
 alias l="ls"
 alias grep="grep -E --color=auto"
 alias gdb="gdb -q"
 alias how="howdoi"
-alias dd="dcfldd"
 alias dmesg="dmesg -H -Lalways"
+
+if command -v dcfldd >/dev/null 2>&1; then
+    alias dd="dcfldd"
+fi
 
 alias pymake="python setup.py"
 
@@ -21,7 +22,6 @@ alias netswitch="sudo netctl-auto switch-to"
 alias netreload="sudo systemctl restart 'netctl-auto@*'"
 alias netlist="netctl-auto list"
 
-alias netepita="netreload; netswitch iit-wifi; nsc"
 alias pingg="ping google.com"
 alias pingd="ping 8.8.8.8"
 alias ixio="curl -F 'f:1=<-' ix.io"
@@ -41,6 +41,10 @@ alias -g ........="../../../../../../.."
 alias -g .........="../../../../../../../.."
 alias -g ..........="../../../../../../../../.."
 
+function faketty() {
+	script -qefc "$(printf "%q " "$@")" /dev/null
+}
+
 function ncproxy() {
     mknod backpipe p
     nohup nc -l -p $1 < backpipe | tee -a in | nc localhost $2 | tee -a ${3:-out.html} > backpipe &
@@ -53,8 +57,6 @@ function try() {
         (eval "$@") || break;
     done
 }
-
-# functions
 
 function iosplit() {
 	local fd=""
