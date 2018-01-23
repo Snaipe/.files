@@ -1,7 +1,11 @@
+# We need this set early
+
+export XDG_CONFIG_HOME="$HOME/.config"
+
 # Source user environment
 
-set -a
 envgen=/usr/lib/systemd/user-environment-generators/29-systemd-environment-d-generator
+set -a
 if [ -x "$envgen" ]; then
     . <("$envgen")
 else

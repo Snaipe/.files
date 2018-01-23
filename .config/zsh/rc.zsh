@@ -1,5 +1,5 @@
-if [ -d "$XDG_CONFIG_HOME"/zsh/init ]; then
-  for f in "$XDG_CONFIG_HOME"/zsh/init/?*.zsh; do
+if [ -d "$ZDOTDIR"/init ]; then
+  for f in "$ZDOTDIR"/init/?*.zsh; do
     [ -x "$f" ] && . "$f"
   done
   unset f
