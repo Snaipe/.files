@@ -47,7 +47,9 @@ prompt_end() {
 }
 
 build_prompt() {
-	[[ "$SESSION_TYPE" == "remote/*" ]] && prompt_context
+	case "$SESSION_TYPE" in
+		remote/*) prompt_context;;
+	esac
 	prompt_status
 	prompt_dir
 	echo -n " >"
