@@ -6,6 +6,11 @@ setopt PROMPT_PERCENT
 CURRENT_BG='NONE'
 SEGMENT_SEPARATOR=''
 
+case "$SESSION_TYPE" in
+      remote/*) primary_color=green;;
+             *) primary_color=magenta;;
+esac
+
 prompt_segment() {
   local bg fg
   [[ -n $1 ]] && bg="%K{$1}" || bg="%k"
@@ -20,15 +25,15 @@ prompt_segment() {
 }
 
 prompt_context() {
-	prompt_segment green black '%{%F{black}%}%n%{%F{magenta}%}@'"$(hostname | cut -d. -f1)"
+	prompt_segment "$primary_color" black '%{%F{black}%}%n%{%F{magenta}%}@'"$(hostname | cut -d. -f1)"
 }
 
 prompt_status() {
-	prompt_segment green black "%(?,,%{%F{red}%}✘ )%(!,%{%F{yellow}%}⚡ ,)%(1j,%{%F{blue}%}%j ⚙ ,)"
+	prompt_segment "$primary_color" black "%(?,,%{%F{red}%}✘ )%(!,%{%F{yellow}%}⚡ ,)%(1j,%{%F{blue}%}%j ⚙ ,)"
 }
 
 prompt_dir() {
-	prompt_segment green black '%2%~' -P
+	prompt_segment "$primary_color" black '%2%~' -P
 }
 
 prompt_end() {
@@ -42,7 +47,7 @@ prompt_end() {
 }
 
 build_prompt() {
-	prompt_context
+	[[ "$SESSION_TYPE" == "remote/*" ]] && prompt_context
 	prompt_status
 	prompt_dir
 	echo -n " >"
