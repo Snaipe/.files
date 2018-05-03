@@ -1,0 +1,1 @@
+FPATH="$XDG_CONFIG_HOME/zsh/comp:$FPATH"

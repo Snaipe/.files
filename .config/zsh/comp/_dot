@@ -1,0 +1,12 @@
+#compdef -tilde-
+
+if [[ "$PREFIX" =~ '\.([^/]*)' ]]; then
+    local -a files
+    files=( "${XDG_CONFIG_HOME}/$match[1]"* )
+    for f in $files[@]; do
+        compadd -QU -I / -q -f -- "${f/$HOME/~}"
+    done
+    return 0
+fi
+
+return 1
