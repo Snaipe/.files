@@ -1,0 +1,18 @@
+#!/bin/bash
+
+percent="$(paste -d' \n' /sys/class/power_supply/*/{charge_now,charge_full} \
+	| awk '{charge += $1; full += $2} END {printf "%3.0f", charge * 100 / full}')"
+
+state=$(head -n1 /sys/class/power_supply/*/status)
+
+icon=''
+if [ "$(cat /sys/class/power_supply/AC/online)" = 1 ]; then
+	icon=''
+fi
+
+case $state in
+	Full|Unknown)
+		percent=100;;
+esac
+
+exec printf "<span rise='-2500'>%s</span>%3d%%" "$icon" "$percent"

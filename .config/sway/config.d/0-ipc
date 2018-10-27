@@ -1,0 +1,2 @@
+exec_always "systemctl --user set-environment I3SOCK=$$I3SOCK"
+exec_always "systemctl --user set-environment SWAYSOCK=$$SWAYSOCK"

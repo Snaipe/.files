@@ -1,0 +1,47 @@
+#!/usr/bin/bash
+
+# spark
+# https://github.com/holman/spark
+
+# $1 - The data we'd like to graph.
+_echo()
+{
+	if [ "X$1" = "X-n" ]; then
+		shift
+		printf "%s" "$*"
+	else
+		printf "%s\n" "$*"
+	fi
+}
+
+spark()
+{
+	local n numbers=
+	local min=0 max=100
+
+	for n in ${@//,/ }
+	do
+		n=${n%.*}
+		numbers=$numbers${numbers:+ }$n
+	done
+
+	# print ticks
+	local ticks=(▁ ▂ ▃ ▄ ▅ ▆ ▇ █)
+
+	# use a high tick if data is constant
+	(( min == max )) && ticks=(▅ ▆)
+
+	local f=$(( (($max-$min)<<8)/(${#ticks[@]}-1) ))
+	(( f < 1 )) && f=1
+
+	for n in $numbers
+	do
+		_echo -n ${ticks[$(( ((($n-$min)<<8)/$f) ))]}
+	done
+}
+
+values=($(LC_ALL=en_US mpstat 1 1 -P ALL -o JSON | mpstat-parse.jq))
+sparklines="$(spark "${values[@]:0:${#values[@]}-1}")"
+avg="${values[${#values[@]}-1]%.*}"
+
+exec printf "<span rise='-2500'></span> <span rise='3000'>%s</span>%3s%%" "$sparklines" "$avg"

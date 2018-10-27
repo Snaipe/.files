@@ -1,0 +1,23 @@
+bar {
+    position top
+
+    separator_symbol ·
+
+    height 32
+
+    pango_markup enabled
+
+    font pango:lemon 15
+
+    strip_workspace_numbers yes
+
+    status_command env PATH=$$HOME/.local/libexec/i3blocks:$$PATH i3blocks
+
+    colors {
+        statusline #ffffff
+        background #00000000
+        focused_workspace $magenta $magenta $black
+        active_workspace $cyan $cyan $black
+        inactive_workspace #32323200 #32323200 $primary
+    }
+}

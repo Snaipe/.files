@@ -1,0 +1,106 @@
+#!/bin/sh -x
+
+nb_workspaces() {
+	echo "$WORKSPACES" | jq length
+}
+
+nth_workspace() {
+	n=$(($1-1)); shift
+	ws="$(echo "$WORKSPACES" | jq -r "[.[] | .name][$n]")"
+	if [ "$ws" = null ]; then
+		ws="$(($(nb_workspaces)*10)):main"
+	fi
+	echo -n "$ws"
+}
+
+current_workspace() {
+	echo "$WS_JSON" | jq '. | range(0;length) as $i | select(.[$i].focused == true) | .[$i]'
+}
+
+find_workspace() {
+	criterion="$1"; shift
+	fallback="$1"; shift
+	method="$1"; shift
+
+	ws="$(echo "$WORKSPACES" | jq "[.[] | select($criterion)] | $method")"
+	if [ "$ws" != null ]; then
+		echo "$ws"
+	else
+		echo "$fallback"
+	fi
+}
+
+next_of() {
+	id="$(echo "$1" | jq -r '.num')"
+	representation="$(echo "$1" | jq -r '.representation')"
+	shift
+
+	next="$(find_workspace ".num > $id" '' first | jq -r '.name')"
+	case "$next" in
+		*0:*)
+			if [ "$representation" != null ]; then
+				next="$((id+1)):main"
+			fi
+			;;
+		'')
+			if [ "$representation" = null ]; then
+				next="$(find_workspace true '0:main' first | jq -r '.name')"
+			else
+				next="$((id-id%10+10)):main"
+			fi
+			;;
+	esac
+	echo -n $next
+}
+
+prev_of() {
+	id="$(echo "$1" | jq -r '.num')"
+	representation="$(echo "$1" | jq -r '.representation')"
+	shift
+
+	prev="$(find_workspace ".num < $id" '' last | jq -r '.name')"
+	case "$prev" in
+		*0:*)
+			if [ "$representation" != null ]; then
+				prev="$((id-1)):main"
+			fi
+			;;
+		'')
+			if [ "$representation" = null ] || [ "$id" = 0 ]; then
+				prev="$(find_workspace true '0:main' last | jq -r '.name')"
+			else
+				prev="$((id-id%10-10)):main"
+			fi
+			;;
+	esac
+	echo -n $prev
+}
+
+action_switch() {
+	ws="$1"; shift
+	exec swaymsg "workspace '$(nth_workspace "$ws")'"
+}
+
+action_move() {
+	ws="$1"; shift
+	exec swaymsg "move container to workspace '$(nth_workspace "$ws")'"
+}
+
+action_next() {
+	exec swaymsg "workspace '$(next_of "$(current_workspace)")'"
+}
+
+action_prev() {
+	exec swaymsg "workspace '$(prev_of "$(current_workspace)")'"
+}
+
+action="$1"; shift
+if ! command -v "action_$action" >/dev/null 2>&1; then
+	>&2 echo invalid action $action
+	exit 2
+fi
+
+WS_JSON="$(swaymsg -t get_workspaces)"
+WORKSPACES="$(echo "$WS_JSON" | jq "[.[] | {name, representation, num}]")"
+
+"action_$action" "$@"

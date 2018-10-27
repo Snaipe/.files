@@ -1,0 +1,17 @@
+set {
+    $datadir ~/.local/share/sway
+    $libexecdir ~/.local/libexec/sway
+    $sysconfdir ~/.config/sway
+
+    $mod Mod4
+}
+
+floating_modifier $mod
+
+# escape hatches when the config goes wrong
+bindsym {
+    $mod+Shift+r reload
+    $mod+Shift+q exit
+}
+
+include $sysconfdir/config.d/*

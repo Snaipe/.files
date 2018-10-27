@@ -1,0 +1,24 @@
+#!/bin/bash
+
+vals=($(awk '
+/^MemTotal:/ {
+	mem_total=$2
+}
+/^MemFree:/ {
+	mem_free=$2
+}
+/^Buffers:/ {
+	mem_free+=$2
+}
+/^Cached:/ {
+	mem_free+=$2
+}
+END {
+    printf("%d %d\n", (mem_total - mem_free) * 1024, mem_total * 1024)
+}
+' /proc/meminfo))
+
+used="$(numfmt --to=iec-i --suffix=B -z ${vals[0]})"
+total="$(numfmt --to=iec-i --suffix=B -z ${vals[1]})"
+
+exec printf "<span rise='-2500'></span> %7s/%s" "$used" "$total"

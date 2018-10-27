@@ -1,0 +1,4 @@
+#!/bin/sh
+temp=$(paste -d' ' /sys/class/thermal/thermal_zone*/temp | awk '{sum += $1; total++} END {print (sum / 1000 / total) + 273.15}')
+
+exec printf "<span rise='-3000'></span>%3.0fK" "$temp"

@@ -1,0 +1,2 @@
+#!/bin/sh
+exec date +"<span rise='-2500'></span> %F <span rise='-2500'></span> %H:%M"

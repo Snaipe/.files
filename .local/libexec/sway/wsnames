@@ -1,0 +1,45 @@
+#!/usr/bin/env python3
+
+import i3ipc
+import re
+
+from collections import defaultdict
+
+i3 = i3ipc.Connection()
+
+default_app = ('main', 0, r'.*')
+
+known_apps = {
+    'firefox': ('web',  5, r'.*'),
+    'termite': ('dev', 10, r'Vim: .*'),
+}
+
+def get_category(leaf):
+    app = known_apps.get(leaf.window_class, default_app)
+    if not re.fullmatch(app[2], leaf.name):
+        app = default_app
+    return app[0], app[1]
+
+def rename(i3, event):
+    for workspace in i3.get_tree().workspaces():
+        # ignore workspaces numbered after 1000
+        if workspace.num >= 1000:
+            continue
+
+        categories = defaultdict(int)
+        categories['main'] = 0
+        for leaf in workspace.leaves():
+            cat, weight = get_category(leaf)
+            categories[cat] += weight
+        first = sorted(categories, key=categories.get, reverse=True)[0]
+        i3.command('rename workspace "%s" to "%s:%s"' % (workspace.name, workspace.num, first))
+
+def main():
+    i3.on('window::move', rename)
+    i3.on('window::new', rename)
+    i3.on('window::title', rename)
+    i3.on('window::close', rename)
+    i3.main()
+
+if __name__ == '__main__':
+    main()

@@ -1,0 +1,22 @@
+#!/bin/sh
+
+INTERFACE="${BLOCK_INSTANCE:-wlan0}"
+
+if [ ! -d /sys/class/net/${INTERFACE}/wireless ] ||
+		[ "$(cat /sys/class/net/$INTERFACE/operstate)" = 'down' ]; then
+	echo -n 
+	exit
+fi
+
+QUALITY=$(grep $INTERFACE /proc/net/wireless | awk '{ print int($3 * 100 / 70) }')
+
+color="#FF0000"
+if [ $QUALITY -ge 80 ]; then
+    color="#00FF00"
+elif [ $QUALITY -lt 80 ]; then
+    color="#FFF600"
+elif [ $QUALITY -lt 60 ]; then
+    color="#FFAE00"
+fi
+
+printf "<span rise='-2500' foreground='%s'></span>%3d%%" "$color" "$QUALITY"

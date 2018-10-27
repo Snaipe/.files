@@ -1,0 +1,47 @@
+#!/bin/sh -x
+
+default_sink() {
+	pacmd stat | awk -F": " '/^Default sink name: /{print $2}'
+}
+
+sink_vol() {
+	pacmd list-sinks |
+		awk '/^\s+name: /{indefault = $2 == "<'$1'>"}
+			/^\s+volume: / && indefault {print ($5 + $12) / 2; exit}'
+}
+
+sink_muted() {
+	pacmd list-sinks |
+		awk '/^\s+name: /{indefault = $2 == "<'$1'>"}
+			/^\s+muted: / && indefault {print $2; exit}'
+}
+
+sink="$(default_sink)"
+vol="$(sink_vol "$sink")"
+muted="$(sink_muted "$sink")"
+
+notches="$((vol / 10))"
+volcolor=""
+if [ "$notches" -gt 10 ]; then
+    notches=10
+    volcolor="foreground='#ff0000'"
+fi
+
+icon=''
+if [ "$muted" = yes ]; then
+    icon=''
+elif [ "$vol" -gt 66 ]; then
+    icon=''
+elif [ "$vol" -gt 33 ]; then
+    icon=''
+fi
+
+printf "<span rise='-2500'>$icon</span> [<span foreground='#e882aa'>"
+for i in $(seq "$notches"); do
+	printf —
+done
+printf "</span>|"
+for i in $(seq $((10 - notches))); do
+	printf —
+done
+printf "] <span %s>%3d%%</span>" "$volcolor" "$vol"

@@ -1,0 +1,14 @@
+bindsym {
+    # Brightness control
+    XF86MonBrightnessUp         exec light -A 10
+    Shift+XF86MonBrightnessUp   exec light -A 5
+    XF86MonBrightnessDown       exec light -U 10
+    Shift+XF86MonBrightnessDown exec light -U 5
+
+    # Volume control
+    XF86AudioRaiseVolume       exec $libexecdir/volume-set +10%
+    Shift+XF86AudioRaiseVolume exec $libexecdir/volume-set +5%
+    XF86AudioLowerVolume       exec $libexecdir/volume-set -10%
+    Shift+XF86AudioLowerVolume exec $libexecdir/volume-set -5%
+    XF86AudioMute              exec $libexecdir/volume-set mute-toggle
+}

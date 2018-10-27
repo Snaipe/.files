@@ -1,0 +1,20 @@
+bindsym {
+    # spawn terminal
+    $mod+Return exec termite
+
+    # kill focused window
+    $mod+Shift+c kill
+
+    # program laucher
+    $mod+BackSpace exec $libexecdir/run
+
+    # enter fullscreen mode for the focused container
+    $mod+f fullscreen toggle
+
+    # toggle tiling / floating
+    $mod+t floating toggle
+
+    # screenshots
+    Print       exec $libexecdir/screenshot
+    Shift+Print exec slurp | $libexecdir/screenshot -g -
+}

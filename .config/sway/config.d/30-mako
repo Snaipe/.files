@@ -1,0 +1,7 @@
+exec_always $libexecdir/swervice mako \
+	--background-color=$black \
+	--border-color=$blue \
+	--text-color=$yellow \
+	--margin=15 \
+	--padding=15 \
+	--font="$font"

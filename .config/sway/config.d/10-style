@@ -1,0 +1,35 @@
+set {
+    $black #010101
+    $white #e1dcd9
+    $red #e6154f
+    $lightred #e3306a
+    $green #68cd89
+    $lightgreen #bbf0c4
+    $yellow #ffff87
+    $lightyellow #fffab8
+    $blue #6699cc
+    $lightblue #99ccff
+    $magenta #e83078
+    $lightmagenta #e882aa
+    $cyan #66ddcc
+    $lightcyan #8deabe
+
+    $primary $magenta
+    $secondary $cyan
+}
+
+output * bg /home/snaipe/.local/share/sway/bg center #000000
+
+set $font Meslo LG M DZ for Powerline 11
+
+font pango:$font
+
+gaps {
+    inner 15
+    outer 0
+}
+smart_gaps on
+
+client.focused #000000 #000000 #000000 #000000 #000000
+
+new_window pixel 1

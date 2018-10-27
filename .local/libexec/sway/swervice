@@ -1,0 +1,9 @@
+#!/bin/sh -e
+export PATH="$HOME/.local/libexec/sway:$PATH"
+export I3SOCK="$SWAYSOCK.i3"
+pidfile="$XDG_RUNTIME_DIR/$1/$XDG_SEAT.pid"
+
+mkdir -p "$(dirname "$pidfile")"
+flock -n "$pidfile" true || kill "$(cat $pidfile)"
+nohup flock -F "$pidfile" "$@" >/dev/null 2>&1 &
+echo "$!" >"$pidfile"

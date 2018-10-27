@@ -1,0 +1,8 @@
+#!/bin/sh -e
+export PATH="$HOME/.local/libexec/sway:$PATH"
+dir="${XDG_PICTURES_DIR}/screenshots"
+filename="$dir/$(date '+%F_%X').png"
+
+mkdir -p "$dir"
+grim "$@" "$filename"
+notify-send "Screenshot taken" "Saved in $(humanize-path $filename)"

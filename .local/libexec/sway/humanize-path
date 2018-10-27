@@ -1,0 +1,5 @@
+#!/bin/sh -e
+realpath -m "$@" | exec sed -E \
+    -e "s:^$HOME:~:" \
+    -e "s:^/home/([^/]+):~\1:" \
+    -e "s:^$(pwd)::"

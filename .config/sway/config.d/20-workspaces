@@ -1,0 +1,62 @@
+exec swaymsg workspace 0:main
+
+set {
+    $1 ampersand
+    $2 eacute
+    $3 quotedbl
+    $4 apostrophe
+    $5 parenleft
+    $6 egrave
+    $7 minus
+    $8 underscore
+    $9 ccedilla
+    $0 agrave
+}
+
+bindsym {
+    Ctrl+Alt+Right workspace next
+    Ctrl+Alt+Left workspace prev
+    $mod+l workspace next
+    $mod+h workspace prev
+    $mod+Shift+l exec $libexecdir/workspace next
+    $mod+Shift+h exec $libexecdir/workspace prev
+
+    # switch to workspace
+    $mod+$1 exec $libexecdir/workspace switch 1
+    $mod+$2 exec $libexecdir/workspace switch 2
+    $mod+$3 exec $libexecdir/workspace switch 3
+    $mod+$4 exec $libexecdir/workspace switch 4
+    $mod+$5 exec $libexecdir/workspace switch 5
+    $mod+$6 exec $libexecdir/workspace switch 6
+    $mod+$7 exec $libexecdir/workspace switch 7
+    $mod+$8 exec $libexecdir/workspace switch 8
+    $mod+$9 exec $libexecdir/workspace switch 9
+    $mod+$0 exec $libexecdir/workspace switch 10
+
+    # move focused container to workspace
+    $mod+Shift+$1 exec $libexecdir/workspace move 1
+    $mod+Shift+$2 exec $libexecdir/workspace move 2
+    $mod+Shift+$3 exec $libexecdir/workspace move 3
+    $mod+Shift+$4 exec $libexecdir/workspace move 4
+    $mod+Shift+$5 exec $libexecdir/workspace move 5
+    $mod+Shift+$6 exec $libexecdir/workspace move 6
+    $mod+Shift+$7 exec $libexecdir/workspace move 7
+    $mod+Shift+$8 exec $libexecdir/workspace move 8
+    $mod+Shift+$9 exec $libexecdir/workspace move 9
+    $mod+Shift+$0 exec $libexecdir/workspace move 10
+}
+
+exec_always $libexecdir/swervice wsnames
+
+set {
+    $ws_chat 1000:chat
+    $ws_game 1001:game
+}
+
+bindsym $mod+i exec irc
+
+assign [title="^(?i)weechat$"] → $ws_chat
+assign [title="^(?i)steam$"]   → $ws_game
+assign [class="^(?i)steam$"]   → $ws_game
+
+for_window [class="^(?i)feh"] floating enable
