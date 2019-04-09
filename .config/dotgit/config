@@ -22,7 +22,6 @@
 
 [alias]
     # convenient aliases
-    files  = "!git i-files"
     lock   = "!git i-filept \"$@\" | sudo xargs chattr +i #"
     unlock = "!git i-filept \"$@\" | sudo xargs chattr -i #"
     edit   = "!git i-edit $(git i-filept \"$@\") #"
@@ -42,29 +41,6 @@
                 "  | sed -E -e 's/^\\s*//' -e 's/\\s*$//' #"
 
     i-splitl  = "!export IFS=\"$(printf '\\n\\r')\"; echo \"$*\" #"
-
-    i-files   = "!if test $# -eq 0; then "                                      \
-                "  lsf='i-cfg ls-files'; "                                      \
-                "else "                                                         \
-                "  lsf='i-cfg ls-files | sed -E $(git i-pattern \"$@\")'; "     \
-                "fi; "                                                          \
-                "cmd=\"( \"; "                                                  \
-                "if [ ! -f \"$GIT_DIR\"/commondir ]; then "                     \
-                "   for p in $(git profiles); do "                              \
-                "     cmd=\"${cmd}git profile $p $lsf; \";"                     \
-                "   done; "                                                     \
-                "else "                                                         \
-                "   cmd=\"( git $lsf; \"; "                                     \
-                "fi; "                                                          \
-                "cmd=\"${cmd}\"')';"                                            \
-                "fmt='$(stat --format \"%A %N\" \"@\" | cut -c 2- )'; "         \
-                "if [ \"$(git config dotfiles.lockFiles)\" = yes ]; then "      \
-                "  fmt='$( (lsattr -d \"@\" 2>/dev/null "                       \
-                "           || echo '----l') | cut -c 5)'\"$fmt\"; "            \
-                "fi; "                                                          \
-                "cd \"$(git rev-parse --show-toplevel)\"; "                     \
-                "eval $cmd | sort | xargs -I@ sh -c \"echo $fmt\"; #"
-
 
     i-filept  = "!worktree=\"$(git rev-parse --show-toplevel)\"; "              \
                 "if test $# -eq 0; then "                                       \

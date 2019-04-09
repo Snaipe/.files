@@ -1,0 +1,80 @@
+#!/bin/sh
+
+# always use the current work tree for our profiles
+export GIT_WORK_TREE="$(git rev-parse --show-toplevel)"
+
+opt="$(getopt -q -o 'p:' --long 'profile:' -n "dot-files" -- "$@")"
+
+if [ $? -ne 0 ]; then
+	>&2 echo "usage: dot-files [-p profile]"
+	exit 1
+fi
+
+eval set -- "$opt"
+unset opt
+
+while true; do
+	case $1 in
+		-p | --profile)
+			profile="${2:-.}"; shift;;
+		--)
+			shift; break;;
+		*)
+			>&2 echo "unexpected parameter $1."
+			exit 1;;
+	esac
+	shift
+done
+
+lsattr="$(git config dotfiles.lockFiles)"
+lscolor=--color
+case "$(uname)" in
+	Darwin)
+		lsattr=no
+		lscolor=-G;;
+esac
+
+pattern() {
+	[ $# -gt 0 ] && printf ' -e \|%s|!d ' "$@" | sed -E -e 's/^\s*//' -e 's/\s*$//'
+}
+
+filter() {
+	sed -Ee '' $(pattern "$@")
+}
+
+files() {
+	local profiles="${profile:-$(git profiles)}"
+	local cmd
+	for p in $profiles; do
+		cmd="${cmd}git profile $p ls-files & "
+	done
+	eval "${cmd} wait"
+}
+
+format() {
+	local prefix='LC_ALL=C stdbuf -o0 -e0 '
+	local lscmd="$prefix"'ls -ld '"$lscolor"' "$@" 2>&1 |
+		sed -e /^ls:/d |
+		awk "{ s = \$1; for (i = 9; i <= NF; i++) s = s \" \" \$i; print s }"'
+	local lsattrcmd="$prefix"'lsattr -d "$@" 2>&1 |
+		sed -e "s/^lsattr: Operation not supported/-----/" \
+			-e /^lsattr:/d |
+		cut -c 5 |
+		tr it L-'
+
+	if ! [ x"$lsattr" = xyes ]; then
+		lsattrcmd='yes - | head -n $(($#-1))'
+	fi
+
+	local fmt="
+	{ $lsattrcmd 4<&- | {
+		$lscmd 3<&- | paste -d '' /dev/fd/3 -
+	  } 3<&0 <&4 4<&-
+	} 4<&0"
+
+	xargs sh -ec "[ \$# -gt 0 ]; $fmt" 2>/dev/null -
+}
+
+cd "$GIT_WORK_TREE"
+
+files | filter "$@" | sort | format
