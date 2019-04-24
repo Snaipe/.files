@@ -3,135 +3,116 @@
 configdir="${XDG_CONFIG_HOME:-"$HOME/.config"}"/run
 cachedir=${XDG_CACHE_HOME:-"$HOME/.cache"}
 if [ -d "$cachedir" ]; then
-    cache=$cachedir/dmenu_run
+	cache=$cachedir/dmenu_run
 fi
 libexec="$HOME/.local/libexec/sway"
 
-dimensions="$(swaymsg -t get_tree | $libexec/current_output_dimensions.jq)"
-IFS=x
-set -- $dimensions
-width=${1:-800}
-height=${2:-600}
-
-width=$((width/2))
-height=$((height/2))
-lines=$((height/21 - 1)) # 12pt in this font ~= 21px
-xoff=$((width/2))
-yoff=$((height/2))
-
 select() {
-    dmenu                                    \
-        -fn 'Meslo LG M DZ for Powerline-12' \
-        -y $yoff -x $xoff                    \
-        -w $width -l $lines                  \
-        -p '>'                               \
-        -r                                   \
-        -q                                   \
-        -z                                   \
-        -i                                   \
-        -dim 0.7                             \
-        -nb '#101010'                        \
-        -nf '#cfcfcf'                        \
-        -sb '#ed6666'                        \
-        -sf '#000000'
+	fzf --inline-info \
+		--layout=reverse \
+		--margin=1 \
+		--header=--- \
+		--preview-window=down \
+		--preview='$(echo {} | cut -d: -f2-) --help' \
+		--history="$cachedir/sway-run-history" \
+		--history-size=128 \
+		--bind page-up:preview-page-up \
+		--bind page-down:preview-page-down \
+		--no-clear
 }
 
 prepend() {
-    sed -e 's|^|'"$1"'|' $2
+	sed -e 's|^|'"$1"'|' $2
 }
 
 trimspace() {
-    sed -E -e 's/^\s*//' -e 's/\s*$//'
+	sed -E -e 's/^\s*//' -e 's/\s*$//'
 }
 
 actions() {
-    if [ -x "$configdir/actions" ]; then
-        actions=$(grep -E -o '\s*(function\s)?\s*actions_\w*\s*\(\)'    \
-                "$configdir/actions"                                    \
-            | sed -E -e 's/actions_(\w*)\s*\(\)/\1/g'                   \
-            | sort -u)
-        for a in $actions; do
-            if command -V "entries_$a" >/dev/null 2>&1; then
-                "entries_$a"
-            else
-                echo $a
-            fi | prepend 'action: '
-        done
-        unset a;
-    fi
-    cat
+	if [ -x "$configdir/actions" ]; then
+		actions=$(grep -E -o '\s*(function\s)?\s*actions_\w*\s*\(\)'    \
+				"$configdir/actions"                                    \
+			| sed -E -e 's/actions_(\w*)\s*\(\)/\1/g'                   \
+			| sort -u)
+		for a in $actions; do
+			if command -V "entries_$a" >/dev/null 2>&1; then
+				"entries_$a"
+			else
+				echo $a
+			fi | prepend 'action: '
+		done
+		unset a;
+	fi
+	cat
 }
 
 desktop_get () {
-    awk -F= -v section="[$2]" -v variable="$3" '
-        $0 == section { in_section = 1; next }
-        in_section && $1 == variable {
-            sub(/^[[:space:]]+/, "")
-            for (i=2; i<=NF; i++) print $i
-            exit
-        }
-        in_section && $1 == "" { exit 1 }
-    ' "$1"
+	awk -F= -v section="[$2]" -v variable="$3" '
+		$0 == section { in_section = 1; next }
+		in_section && $1 == variable {
+			sub(/^[[:space:]]+/, "")
+			for (i=2; i<=NF; i++) print $i
+			exit
+		}
+		in_section && $1 == "" { exit 1 }
+	' "$1"
 }
 
 apps() {
-    if [ -d "/usr/share/applications/" ]; then
-        for f in /usr/share/applications/?*.desktop; do
-            desktop_get "$f" 'Desktop Entry' Name
-        done | prepend 'app: '
-        unset f
-    fi
-    cat
+	if [ -d "/usr/share/applications/" ]; then
+		for f in /usr/share/applications/?*.desktop; do
+			desktop_get "$f" 'Desktop Entry' Name
+		done | prepend 'app: '
+		unset f
+	fi
+	cat
 }
 
 wm() {
-    if command -v wmctrl >/dev/null; then
-        wmctrl -d                                   \
-            | grep -E '^[[:digit:]]+[[:space:]]*-'  \
-            | grep -E -o '\w*$'                     \
-            | prepend 'workspace: '
-        wmctrl -l \
-            | grep -E -o "$(hostname) .*$" \
-            | sed -e "s/^$(hostname) //" \
-            | prepend 'window: '
-    fi
-    cat
+	swaymsg -t get_workspaces \
+		| jq -r '.[].name' \
+		| prepend 'workspace: '
+	swaymsg -t get_tree \
+		| ~/.local/libexec/sway/list-windows.jq \
+		| prepend 'window: '
+	cat
+}
+
+executables() {
+	( IFS=:; find $PATH -executable -type f -printf '%f\n' ) | sort -u | prepend 'run: '
 }
 
 workspace_from_name() {
-    wmctrl -d | grep -E "$1$" | grep -E -o '^[[:digit:]]+'
+	wmctrl -d | grep -E "$1$" | grep -E -o '^[[:digit:]]+'
 }
 
 run() {
-    IFS=''
-    select="$(head -n1)"
-    type="$(echo $select | cut -d: -f1)"
-    val="$(echo $select | cut -d: -f2- | trimspace)"
-    unset IFS
+	IFS=''
+	select="$(head -n1)"
+	type="$(echo $select | cut -d: -f1)"
+	val="$(echo $select | cut -d: -f2- | trimspace)"
+	unset IFS
 
-    case $type in
-        action|act|a)
-            eval actions_$val &;;
-        run|r)
-            eval $val &;;
-        app)
-            launch=$(grep -E "^Name=\s*$val\s*" -r "/usr/share/applications" \
-                | cut -d: -f1)
-            eval $(desktop_get "$launch" 'Desktop Entry' Exec       \
-                | sed -e 's/^Exec=//' -e 's/%[fFuUdDnNickvm]//g') &
-            ;;
-        workspace|work) wmctrl -s "$(workspace_from_name $val)" &;;
-        window|win) wmctrl -a "$val" &;;
-    esac
+	case $type in
+		action|act|a)
+			eval actions_$val &;;
+		run|r)
+			exec swaymsg exec $val;;
+		app)
+			launch=$(grep -E "^Name=\s*$val\s*" -r "/usr/share/applications" \
+				| cut -d: -f1)
+			eval exec $(desktop_get "$launch" 'Desktop Entry' Exec \
+				| sed -e 's/^Exec=//' -e 's/%[fFuUdDnNickvm]//g') &
+			;;
+		workspace|work)
+			exec swaymsg workspace $val;;
+		window|win)
+			ws="$(echo "$val" | grep -Eo '^\[[^]]+\]' | tr -d '\[\]')"
+			exec swaymsg workspace $ws;;
+	esac
 }
 
 [ -x "$configdir/actions" ] && . $configdir/actions >/dev/null 2>&1
 
-(
-    IFS=:
-    if stest -dqr -n "$cache" $PATH; then
-        stest -flx $PATH | sort -u > "$cache"
-    fi
-    unset IFS
-    cat "$cache" | prepend 'run: ' | actions | apps | wm | select
-) | run
+executables | actions | apps | wm | select | run

@@ -6,7 +6,7 @@ bindsym {
     $mod+Shift+c kill
 
     # program laucher
-    $mod+BackSpace exec $libexecdir/run
+    $mod+Backspace exec termite --name sway-run -e $libexecdir/run
 
     # enter fullscreen mode for the focused container
     $mod+f fullscreen toggle

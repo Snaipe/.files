@@ -60,3 +60,5 @@ assign [title="^(?i)steam$"]   → $ws_game
 assign [class="^(?i)steam$"]   → $ws_game
 
 for_window [class="^(?i)feh"] floating enable
+
+for_window [app_id="^(?i)sway-run"] floating enable
