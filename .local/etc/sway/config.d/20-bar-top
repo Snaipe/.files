@@ -20,4 +20,9 @@ bar {
         active_workspace $cyan $cyan $black
         inactive_workspace #32323200 #32323200 $primary
     }
+
+    status_padding 5
+    status_edge_padding 10
+
+    gaps 15
 }

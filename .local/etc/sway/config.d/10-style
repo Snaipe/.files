@@ -28,8 +28,7 @@ gaps {
     inner 15
     outer 0
 }
-smart_gaps on
 
 client.focused #000000 #000000 #000000 #000000 #000000
 
-new_window pixel 1
+default_border pixel 1
