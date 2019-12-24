@@ -44,6 +44,10 @@ bindsym {
     $mod+Shift+$8 exec $libexecdir/workspace move 8
     $mod+Shift+$9 exec $libexecdir/workspace move 9
     $mod+Shift+$0 exec $libexecdir/workspace move 10
+
+    # move workspaces to other outputs
+    $mod+Ctrl+Left move workspace to output left
+    $mod+Ctrl+Right move workspace to output right
 }
 
 exec_always $libexecdir/swervice wsnames
