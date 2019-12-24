@@ -3,7 +3,7 @@
 configdir="${XDG_CONFIG_HOME:-"$HOME/.config"}"/run
 cachedir=${XDG_CACHE_HOME:-"$HOME/.cache"}
 if [ -d "$cachedir" ]; then
-	cache=$cachedir/dmenu_run
+	cache=$cachedir/sway-run
 fi
 libexec="$HOME/.local/libexec/sway"
 
