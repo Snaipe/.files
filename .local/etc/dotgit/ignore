@@ -1,4 +1,4 @@
-.config/dotgit/
+.local/etc/dotgit/
 
 # Nixes
 .cache/

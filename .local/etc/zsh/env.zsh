@@ -1,7 +1,3 @@
-# We need this set early
-
-export XDG_CONFIG_HOME="$HOME/.config"
-
 # Source user environment
 
 envgen=/usr/lib/systemd/user-environment-generators/29-systemd-environment-d-generator

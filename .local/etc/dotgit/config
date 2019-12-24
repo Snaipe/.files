@@ -100,7 +100,7 @@
     repositoryformatversion = 0
     filemode = true
     worktree = "/home/snaipe"
-    excludesFile = "~/.config/dotgit/ignore"
+    excludesFile = "~/.local/etc/dotgit/ignore"
 
 [grep]
     lineNumber = true
