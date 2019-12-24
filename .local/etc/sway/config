@@ -1,7 +1,7 @@
 set {
     $datadir ~/.local/share/sway
     $libexecdir ~/.local/libexec/sway
-    $sysconfdir ~/.config/sway
+    $sysconfdir ~/.local/etc/sway
 
     $mod Mod4
 }
