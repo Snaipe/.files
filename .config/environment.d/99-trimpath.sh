@@ -1,4 +1,4 @@
-PATH="$(echo "$PATH" | /bin/awk -F: '
+PATH="$(echo "$PATH" | awk -F: '
 BEGIN {
     RS=":";
 }{
