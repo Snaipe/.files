@@ -44,4 +44,4 @@ values=($(LC_ALL=en_US mpstat 1 1 -P ALL -o JSON | mpstat-parse.jq))
 sparklines="$(spark "${values[@]:0:${#values[@]}-1}")"
 avg="${values[${#values[@]}-1]%.*}"
 
-exec printf "<span rise='-2500'></span> <span rise='3000'>%s</span>%3s%%" "$sparklines" "$avg"
+exec printf "<span rise='-1000'></span> <span rise='3000'>%s</span>%3s%%" "$sparklines" "$avg"
